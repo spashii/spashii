@@ -5,10 +5,8 @@ import { useTheme } from "next-themes";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 export const DarkModeToggle = () => {
@@ -52,12 +50,12 @@ export const DarkModeToggle = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Are you absolutely sure?</DialogTitle>
-                <DialogDescription>
-                  There is a reason why dark mode is enabled by default, are you
-                  sure you want to blind yourself?
-                </DialogDescription>
               </DialogHeader>
-              <div className="flex justify-end space-x-4 mt-4">
+              <div>
+                There is a reason why dark mode is enabled by default, are you
+                sure you want to blind yourself?
+              </div>
+              <div className="flex flex-wrap gap-2 justify-end space-x-4">
                 <Button onClick={() => setIsModalOpen(false)} variant="outline">
                   NO, get me the hell out of here
                 </Button>

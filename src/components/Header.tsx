@@ -12,7 +12,6 @@ import { Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FunctionComponent } from "react";
-import { DarkModeToggle } from "./DarkModeToggle";
 interface MenuItem {
   name: string;
   href: string;
@@ -35,7 +34,7 @@ export const Navigation: FunctionComponent = () => {
               target={item.openInNewTab ? "_blank" : "_self"}
               className={cn(
                 "hover:text-gray-900 hover:dark:text-gray-200",
-                pathname === item.href && "font-semibold",
+                pathname === item.href && "font-semibold"
               )}
             >
               {item.name}
@@ -51,19 +50,26 @@ export const Navigation: FunctionComponent = () => {
           <SheetContent>
             <SheetHeader>
               <SheetDescription>
-                {menuItems.map((item) => (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    target={item.openInNewTab ? "_blank" : "_self"}
-                    className={cn(
-                      "block py-2",
-                      pathname === item.href && "font-semibold",
-                    )}
-                  >
-                    {item.name}
-                  </a>
-                ))}
+                <div className="text-left text-2xl">
+                  <Link href="/" className="font-semibold">
+                    {config.blog.name}
+                  </Link>
+                  <div className="text-left space-y-2 mt-4">
+                    {menuItems.map((item) => (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        target={item.openInNewTab ? "_blank" : "_self"}
+                        className={cn(
+                          "block text-sm",
+                          pathname === item.href && "font-semibold"
+                        )}
+                      >
+                        {item.name}
+                      </a>
+                    ))}
+                  </div>
+                </div>
               </SheetDescription>
             </SheetHeader>
           </SheetContent>

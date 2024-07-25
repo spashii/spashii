@@ -1,8 +1,5 @@
 import { BlogPostsPreview } from "@/components/BlogPostPreview";
-import { BlogPostsPagination } from "@/components/BlogPostsPagination";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import Layout from "@/components/Layout";
+
 import { Badge } from "@/components/ui/badge";
 import { wisp } from "@/lib/wisp";
 import { CircleX } from "lucide-react";
@@ -41,10 +38,6 @@ const Page = async ({
         </Badge>
       </Link>
       <BlogPostsPreview posts={result.posts} />
-      <BlogPostsPagination
-        pagination={result.pagination}
-        basePath={`/tag/${slug}/?page=`}
-      />
     </div>
   );
 };

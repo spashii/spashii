@@ -12,6 +12,7 @@ import { Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FunctionComponent } from "react";
+import { DarkModeToggle } from "./DarkModeToggle";
 interface MenuItem {
   name: string;
   href: string;
@@ -33,8 +34,8 @@ export const Navigation: FunctionComponent = () => {
               href={item.href}
               target={item.openInNewTab ? "_blank" : "_self"}
               className={cn(
-                "hover:text-gray-900",
-                pathname === item.href && "font-semibold"
+                "hover:text-gray-900 hover:dark:text-gray-200",
+                pathname === item.href && "font-semibold",
               )}
             >
               {item.name}
@@ -57,7 +58,7 @@ export const Navigation: FunctionComponent = () => {
                     target={item.openInNewTab ? "_blank" : "_self"}
                     className={cn(
                       "block py-2",
-                      pathname === item.href && "font-semibold"
+                      pathname === item.href && "font-semibold",
                     )}
                   >
                     {item.name}

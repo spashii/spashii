@@ -1,6 +1,7 @@
 import { BlogPostContent } from "@/components/BlogPostContent";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import Layout from "@/components/Layout";
 import { RelatedPosts } from "@/components/RelatedPosts";
 import { config } from "@/config";
 import { signOgImageUrl } from "@/lib/og-image";
@@ -62,12 +63,11 @@ const Page = async ({ params: { slug } }: { params: Params }) => {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="container mx-auto px-5">
-        <Header />
+
+      <Layout>
         <BlogPostContent post={result.post} />
         <RelatedPosts posts={posts} />
-        <Footer />
-      </div>
+      </Layout>
     </>
   );
 };

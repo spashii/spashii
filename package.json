@@ -1,5 +1,5 @@
 {
-  "name": "geek-wisp",
+  "name": "@spashii/blog",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@icons-pack/react-simple-icons": "^9.6.0",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
     "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-dropdown-menu": "^2.1.1",

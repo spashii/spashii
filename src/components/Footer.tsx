@@ -5,36 +5,28 @@ import Link from "next/link";
 import { FunctionComponent } from "react";
 import { DarkModeToggle } from "./DarkModeToggle";
 import { Button } from "./ui/button";
+import { SiGithub } from "@icons-pack/react-simple-icons";
 
 export const Footer: FunctionComponent = () => {
   return (
-    <section className="mt-8 md:mt-16 mb-12">
-      <div className="flex items-center justify-between">
+    <section>
+      <div className="flex items-center flex-wrap justify-between gap-2 pb-4">
         <div className="text-sm text-muted-foreground">
           © {config.blog.copyright} {new Date().getFullYear()}
         </div>
-        <div className="text-xs text-muted-foreground hidden lg:block">
-          <Link
-            href={`https://wisp.blog/?utm_source=next-js-template&utm_medium=web&utm_campaign=${config.baseUrl}`}
-          >
-            Blog powered by wisp
+        <div className="space-x-2">
+          <Link href="https://github.com/spashii">
+            <Button variant="ghost">
+              <SiGithub className="w-4 h-4" />
+            </Button>
           </Link>
-        </div>
-        <div>
           <Link href="/rss">
-            <Button variant="ghost" className="p-2">
+            <Button variant="ghost">
               <Rss className="w-4 h-4" />
             </Button>
           </Link>
           <DarkModeToggle />
         </div>
-      </div>
-      <div className="text-xs text-muted-foreground lg:hidden">
-        <Link
-          href={`https://wisp.blog/?utm_source=next-js-template&utm_medium=web&utm_campaign=${config.baseUrl}`}
-        >
-          Blog powered by wisp
-        </Link>
       </div>
     </section>
   );

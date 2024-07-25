@@ -1,5 +1,6 @@
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import Layout from "@/components/Layout";
 import { config } from "@/config";
 import { signOgImageUrl } from "@/lib/og-image";
 import Markdown from "react-markdown";
@@ -46,13 +47,11 @@ export async function generateMetadata() {
 
 const Page = async () => {
   return (
-    <div className="container mx-auto px-5">
-      <Header />
+    <Layout>
       <div className="prose lg:prose-lg dark:prose-invert m-auto mt-20 mb-10 blog-content">
         <Markdown>{content}</Markdown>
       </div>
-      <Footer />
-    </div>
+    </Layout>
   );
 };
 

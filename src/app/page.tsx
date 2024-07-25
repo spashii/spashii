@@ -1,8 +1,8 @@
 import { BlogPostsPreview } from "@/components/BlogPostPreview";
 import { BlogPostsPagination } from "@/components/BlogPostsPagination";
 import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 import Layout from "@/components/Layout";
+import { sleep } from "@/lib/utils";
 import { wisp } from "@/lib/wisp";
 
 const Page = async ({
@@ -14,10 +14,10 @@ const Page = async ({
   const result = await wisp.getPosts({ limit: 6, page });
 
   return (
-    <Layout>
+    <div>
       <BlogPostsPreview posts={result.posts} />
       <BlogPostsPagination pagination={result.pagination} />
-    </Layout>
+    </div>
   );
 };
 

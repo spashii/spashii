@@ -40,6 +40,13 @@ export const BlogPostContent = ({ post }: { post: GetPostResult["post"] }) => {
     <div>
       <div className="prose lg:prose-xl dark:prose-invert mx-auto lg:prose-h1:text-4xl break-words">
         <h1>{title}</h1>
+
+        <div className="text-sm opacity-40 mt-4">
+          {Intl.DateTimeFormat("en-US").format(
+            new Date(publishedAt || createdAt)
+          )}
+        </div>
+
         <PostContent content={content} />
 
         <div className="mt-10 opacity-40 text-sm">
@@ -52,11 +59,6 @@ export const BlogPostContent = ({ post }: { post: GetPostResult["post"] }) => {
               #{tag.name}
             </Link>
           ))}
-        </div>
-        <div className="text-sm opacity-40 mt-4">
-          {Intl.DateTimeFormat("en-US").format(
-            new Date(publishedAt || createdAt)
-          )}
         </div>
       </div>
     </div>

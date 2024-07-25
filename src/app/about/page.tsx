@@ -45,11 +45,11 @@ export async function generateMetadata() {
 
 const Page = async () => {
   return (
-    <Layout>
+    <div>
       <div className="prose lg:prose-lg dark:prose-invert m-auto blog-content">
         <Markdown>{content}</Markdown>
       </div>
-    </Layout>
+    </div>
   );
 };
 

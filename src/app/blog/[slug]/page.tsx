@@ -64,10 +64,10 @@ const Page = async ({ params: { slug } }: { params: Params }) => {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <Layout>
+      <div>
         <BlogPostContent post={result.post} />
         <RelatedPosts posts={posts} />
-      </Layout>
+      </div>
     </>
   );
 };

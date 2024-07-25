@@ -1,5 +1,6 @@
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import Layout from "@/components/Layout";
 import { config } from "@/config";
 import { signOgImageUrl } from "@/lib/og-image";
 import { wisp } from "@/lib/wisp";
@@ -26,9 +27,8 @@ export default async function Page() {
   const result = await wisp.getTags();
 
   return (
-    <div className="container mx-auto px-5">
-      <Header />
-      <div className="mt-20 mb-12 text-center">
+    <Layout>
+      <div className="text-center">
         <h1 className="mb-2 text-5xl font-bold">Tags</h1>
         <p className="text-lg opacity-50">List of all tags</p>
       </div>
@@ -43,7 +43,6 @@ export default async function Page() {
           </Link>
         ))}
       </div>
-      <Footer />
-    </div>
+    </Layout>
   );
 }

@@ -1,5 +1,3 @@
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 import Layout from "@/components/Layout";
 import { config } from "@/config";
 import { signOgImageUrl } from "@/lib/og-image";
@@ -48,7 +46,7 @@ export async function generateMetadata() {
 const Page = async () => {
   return (
     <Layout>
-      <div className="prose lg:prose-lg dark:prose-invert m-auto mt-20 mb-10 blog-content">
+      <div className="prose lg:prose-lg dark:prose-invert m-auto blog-content">
         <Markdown>{content}</Markdown>
       </div>
     </Layout>

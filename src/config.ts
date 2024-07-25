@@ -3,7 +3,7 @@ const buildConfig = () => {
   if (!blogId) throw new Error("NEXT_PUBLIC_BLOG_ID is missing");
   const name = process.env.NEXT_PUBLIC_BLOG_DISPLAY_NAME || "spashii.dev";
   const copyright =
-    process.env.NEXT_PUBLIC_BLOG_COPYRIGHT || "Sameer (yep, it's mine)";
+    process.env.NEXT_PUBLIC_BLOG_COPYRIGHT || "spashii (yep, that's me)";
   const defaultTitle =
     process.env.NEXT_DEFAULT_METADATA_DEFAULT_TITLE || "spashii.dev";
   const defaultDescription =

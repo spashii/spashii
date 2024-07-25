@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export const NotFound = () => {
   return (
-    <div className="flex h-screen flex-col items-center justify-center">
+    <div>
       <h1 className="text-5xl font-bold">404</h1>
       <p className="mt-2 text-2xl">
         Congrats, you&apos;ve found our secret page of nothing!

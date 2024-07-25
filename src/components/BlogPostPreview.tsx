@@ -7,7 +7,7 @@ import Link from "next/link";
 import { FunctionComponent } from "react";
 
 export const BlogPostPreview: FunctionComponent<{
-  post: GetPostsResult["posts"][0];
+  post: BlogPost;
 }> = ({ post }) => {
   return (
     <div className="break-words">
@@ -44,7 +44,7 @@ export const BlogPostPreview: FunctionComponent<{
 };
 
 export const BlogPostsPreview: FunctionComponent<{
-  posts: GetPostsResult["posts"];
+  posts: BlogPost[];
   className?: string;
 }> = ({ posts, className }) => {
   return (

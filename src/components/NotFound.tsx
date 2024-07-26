@@ -9,7 +9,7 @@ export const NotFound = () => {
     <div>
       <h1 className="text-5xl font-bold">404</h1>
       <p className="mt-2 text-2xl">
-        Congrats, you&apos;ve found our secret page of nothing!
+        Congrats, you&apos;ve found a secret page of nothing!
       </p>
 
       <Button asChild className="mt-4">

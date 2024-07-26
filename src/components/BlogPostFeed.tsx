@@ -1,8 +1,10 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { GetPostsResponse } from "@/app/api/posts/route";
-import { BlogPostsPreview } from "./BlogPostPreview";
+import { BlogPostPreviewGrid } from "./BlogPostPreview";
 import { Confetti } from "./Confetti";
+import { revalidate } from "@/app/page";
+import { config } from "@/config";
 
 type PostListProps = {
   initialPosts: BlogPost[];
@@ -30,7 +32,7 @@ export default function BlogPostFeed({
           `/api/posts?cursor=${nextCursor}&limit=5`,
           {
             next: {
-              revalidate: 3600,
+              revalidate: config.revalidateSeconds,
             },
           }
         );
@@ -79,7 +81,6 @@ export default function BlogPostFeed({
       (entries) => {
         if (entries[0].isIntersecting && !nextCursor) {
           setShowConfetti(true);
-          console.log("Confetti triggered!"); // Debug log
         }
       },
       { threshold: 0.1 }
@@ -96,9 +97,9 @@ export default function BlogPostFeed({
 
   return (
     <>
-      <BlogPostsPreview posts={posts} />
+      <BlogPostPreviewGrid posts={posts} />
       <div className="text-center text-slate-600 my-12">
-        <div className="relative pt-8">
+        <div className="relative py-8">
           {nextCursor ? (
             <div ref={scrollTrigger}>
               {isLoading
@@ -110,7 +111,7 @@ export default function BlogPostFeed({
               <p className="text-slate-600 relative z-10" ref={endMessageRef}>
                 Congrats, you&apos;ve hit the end!
               </p>
-              {showConfetti && (
+              {showConfetti && posts.length > 5 && (
                 <div className="absolute inset-0 z-50">
                   <Confetti />
                 </div>

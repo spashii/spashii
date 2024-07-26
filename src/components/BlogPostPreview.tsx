@@ -1,6 +1,5 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { GetPostsResult } from "@/lib/wisp";
 import { formatDate } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +7,8 @@ import { FunctionComponent } from "react";
 
 export const BlogPostPreview: FunctionComponent<{
   post: BlogPost;
-}> = ({ post }) => {
+  small?: boolean;
+}> = ({ post, small }) => {
   return (
     <div className="break-words">
       <Link href={`/blog/${post.slug}`}>
@@ -22,7 +22,12 @@ export const BlogPostPreview: FunctionComponent<{
         </div>
       </Link>
       <div className="grid grid-cols-1 gap-3 md:col-span-2 mt-4">
-        <h2 className="font-sans font-semibold tracking-tighter text-primary text-2xl md:text-3xl">
+        <h2
+          className={cn(
+            "font-sans font-semibold tracking-tighter text-primary",
+            !small ? "text-2xl md:text-3xl" : "text-xl"
+          )}
+        >
           <Link href={`/blog/${post.slug}`}>{post.title}</Link>
         </h2>
         <div className="prose lg:prose-lg italic tracking-tighter text-muted-foreground">
@@ -43,7 +48,7 @@ export const BlogPostPreview: FunctionComponent<{
   );
 };
 
-export const BlogPostsPreview: FunctionComponent<{
+export const BlogPostPreviewGrid: FunctionComponent<{
   posts: BlogPost[];
   className?: string;
 }> = ({ posts, className }) => {

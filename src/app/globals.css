@@ -68,24 +68,10 @@
 
 @layer base {
   * {
+    box-sizing: border-box;
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
-  }
-
-  .blog-content img {
-    @apply w-full;
-    @apply max-h-[350px];
-  }
-
-  pre {
-    overflow-x: auto;
-    white-space: pre;
-    word-wrap: normal;
-  }
-
-  code {
-    display: block;
   }
 }

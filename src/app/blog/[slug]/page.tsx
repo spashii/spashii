@@ -1,11 +1,12 @@
 import { BlogPostContent } from "@/components/BlogPostContent";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import Layout from "@/components/Layout";
 import { RelatedPosts } from "@/components/RelatedPosts";
 import { config } from "@/config";
+import {
+  getPageContentById,
+  getPagePropertiesBySlug,
+  getRelatedPostsBySlug,
+} from "@/lib/notion";
 import { signOgImageUrl } from "@/lib/og-image";
-import { wisp } from "@/lib/wisp";
 import { notFound } from "next/navigation";
 import type { BlogPosting, WithContext } from "schema-dts";
 
@@ -14,14 +15,14 @@ export async function generateMetadata({
 }: {
   params: Params;
 }) {
-  const result = await wisp.getPost(slug);
-  if (!result || !result.post) {
+  const result = await getPagePropertiesBySlug(slug);
+  if (!result) {
     return {
       title: "Blog post not found",
     };
   }
 
-  const { title, description, image } = result.post;
+  const { title, description, image } = result;
   const generatedOgImage = signOgImageUrl({ title, brand: config.blog.name });
 
   return {
@@ -38,15 +39,22 @@ interface Params {
   slug: string;
 }
 
-const Page = async ({ params: { slug } }: { params: Params }) => {
-  const result = await wisp.getPost(slug);
-  const { posts } = await wisp.getRelatedPosts({ slug, limit: 3 });
+// revalidate
+export const revalidate = config.revalidateSeconds;
 
-  if (!result || !result.post) {
+const Page = async ({ params: { slug } }: { params: Params }) => {
+  const pageProperties = await getPagePropertiesBySlug(slug);
+
+  if (!pageProperties) {
     return notFound();
   }
 
-  const { title, publishedAt, updatedAt, image } = result.post;
+  const [pageContent, relatedPosts] = await Promise.all([
+    getPageContentById(pageProperties.id),
+    getRelatedPostsBySlug(slug),
+  ]);
+
+  const { title, publishedAt, updatedAt, image } = pageProperties;
 
   const jsonLd: WithContext<BlogPosting> = {
     "@context": "https://schema.org",
@@ -65,8 +73,12 @@ const Page = async ({ params: { slug } }: { params: Params }) => {
       />
 
       <div>
-        <BlogPostContent post={result.post} />
-        <RelatedPosts posts={posts} />
+        <BlogPostContent
+          pageContent={pageContent}
+          pageProperties={pageProperties}
+        />
+
+        <RelatedPosts posts={relatedPosts} />
       </div>
     </>
   );

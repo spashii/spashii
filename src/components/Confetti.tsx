@@ -23,7 +23,7 @@ export const Confetti = () => {
         },
         particles: {
           number: {
-            value: 100,
+            value: 80,
           },
           color: {
             value: ["#00FFFC", "#FC00FF", "#fffc00"],
@@ -139,12 +139,8 @@ export const Confetti = () => {
     []
   );
 
-  const particlesLoaded = async (container?: Container) => {
-    console.log("Particles loaded", container);
-  };
-
   if (init) {
-    return <Particles particlesLoaded={particlesLoaded} options={options} />;
+    return <Particles options={options} />;
   }
 
   return <></>;

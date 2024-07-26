@@ -11,6 +11,7 @@ const buildConfig = () => {
     "Everyone's welcome (yes, even you)";
 
   return {
+    revalidateSeconds: 1800,
     baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
     blog: {
       name,

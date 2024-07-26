@@ -1,4 +1,4 @@
-import { BlogPostsPreview } from "@/components/BlogPostPreview";
+import { BlogPostPreviewGrid } from "@/components/BlogPostPreview";
 
 import { Badge } from "@/components/ui/badge";
 import { wisp } from "@/lib/wisp";
@@ -37,7 +37,7 @@ const Page = async ({
           Posts tagged with <strong className="mx-2">#{slug}</strong>{" "}
         </Badge>
       </Link>
-      <BlogPostsPreview posts={result.posts} />
+      <BlogPostPreviewGrid posts={result.posts} />
     </div>
   );
 };

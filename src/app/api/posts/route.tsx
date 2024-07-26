@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getBlogPosts, notionToWisp } from "@/lib/notion";
+import { getBlogPosts, notionToBlogPost } from "@/lib/notion";
 
 export type GetPostsResponse = {
   posts: BlogPost[];

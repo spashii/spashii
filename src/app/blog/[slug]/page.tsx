@@ -40,7 +40,7 @@ interface Params {
 }
 
 // revalidate
-export const revalidate = config.revalidateSeconds;
+export const revalidate = 1800;
 
 const Page = async ({ params: { slug } }: { params: Params }) => {
   const pageProperties = await getPagePropertiesBySlug(slug);

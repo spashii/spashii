@@ -71,7 +71,17 @@
     box-sizing: border-box;
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.notion .notion-code {
+  max-width: 100%;
+}
+
+.notion .notion-code > pre > code {
+  max-width: 100%;
+  overflow-x: auto;
 }

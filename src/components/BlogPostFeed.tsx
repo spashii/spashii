@@ -32,7 +32,7 @@ export default function BlogPostFeed({
           `/api/posts?cursor=${nextCursor}&limit=5`,
           {
             next: {
-              revalidate: config.revalidateSeconds,
+              revalidate: 1800,
             },
           }
         );

@@ -37,7 +37,7 @@ export default async function Page() {
         <h1 className="mb-2 text-5xl font-bold">Tags</h1>
         <p className="text-lg opacity-50">List of all tags</p>
       </div>
-      <div className="my-10 max-w-6xl text-balance text-center text-xl mb-48 flex gap-8 wrap">
+      <div className="my-10 max-w-6xl text-balance text-center text-xl mb-48 flex gap-8 flex-wrap">
         {Array.from(tags)
           .sort()
           .map((tag) => (

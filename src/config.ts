@@ -11,7 +11,7 @@ const buildConfig = () => {
 
   return {
     revalidateSeconds: 1800,
-    baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://spashii.",
+    baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://spashii.dev",
     blog: {
       name,
       copyright,

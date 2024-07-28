@@ -2,13 +2,29 @@ import { BlogPostContent } from "@/components/BlogPostContent";
 import { RelatedPosts } from "@/components/RelatedPosts";
 import { config } from "@/config";
 import {
+  getAllBlogPosts,
+  getBlogPosts,
   getPageContentById,
+  // getBlocks,
   getPagePropertiesBySlug,
   getRelatedPostsBySlug,
 } from "@/lib/notion";
 import { signOgImageUrl } from "@/lib/og-image";
 import { notFound } from "next/navigation";
 import type { BlogPosting, WithContext } from "schema-dts";
+
+// revalidate
+export const revalidate = 1800;
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  // Fetch all possible slugs
+  const results = await getAllBlogPosts();
+  const slugs = results.map((post) => post.slug);
+
+  // Generate static paths
+  return slugs.map((slug) => ({ params: { slug } }));
+}
 
 export async function generateMetadata({
   params: { slug },
@@ -39,9 +55,6 @@ interface Params {
   slug: string;
 }
 
-// revalidate
-export const revalidate = 1800;
-
 const Page = async ({ params: { slug } }: { params: Params }) => {
   const pageProperties = await getPagePropertiesBySlug(slug);
 
@@ -50,6 +63,7 @@ const Page = async ({ params: { slug } }: { params: Params }) => {
   }
 
   const [pageContent, relatedPosts] = await Promise.all([
+    // getBlocks(pageProperties.id),
     getPageContentById(pageProperties.id),
     getRelatedPostsBySlug(slug),
   ]);

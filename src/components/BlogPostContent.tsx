@@ -3,6 +3,7 @@ import Link from "next/link";
 import { NotionRenderer } from "react-notion-x";
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
+// import { Render } from "@9gustin/react-notion-render";
 
 const Code = dynamic(() =>
   import("react-notion-x/build/third-party/code").then((m) => m.Code)
@@ -38,9 +39,9 @@ export const BlogPostContent = ({
   const theme = useTheme();
 
   if (!pageProperties) return null;
-  console.log(pageProperties, pageContent);
 
   const { title, publishedAt, createdAt, tags } = pageProperties;
+
   return (
     <div className="space-y-4 mb-16">
       <h1 className="text-4xl font-semibold">{title}</h1>
@@ -64,12 +65,14 @@ export const BlogPostContent = ({
       </div>
 
       <div key={theme.resolvedTheme}>
+        {/* <Render blocks={pageContent} useStyles classNames /> */}
+
         <NotionRenderer
           darkMode={theme.resolvedTheme === "dark"}
           recordMap={pageContent}
           isImageZoomable={true}
           disableHeader
-          className="!p-0 !max-w-prose !w-full"
+          className="!p-0 !max-w-prose !w-full !grid !grid-cols-1 !gap-4"
           components={{
             Code,
             Collection,

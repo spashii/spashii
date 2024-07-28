@@ -1,10 +1,9 @@
 "use client";
+
 import { useState, useRef, useEffect, useCallback } from "react";
 import { GetPostsResponse } from "@/app/api/posts/route";
 import { BlogPostPreviewGrid } from "./BlogPostPreview";
 import { Confetti } from "./Confetti";
-import { revalidate } from "@/app/page";
-import { config } from "@/config";
 
 type PostListProps = {
   initialPosts: BlogPost[];

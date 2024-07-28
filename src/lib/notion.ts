@@ -1,5 +1,8 @@
+import "server-only";
+
 import { cache } from "react";
 import { Client } from "@notionhq/client";
+import { getRandomInt } from "./utils";
 // @ts-ignore
 import { NotionCompatAPI } from "notion-compat";
 
@@ -10,6 +13,7 @@ if (!apiKey) {
 }
 
 const notion = new Client({ auth: apiKey });
+
 const notionClientForPageContent = new NotionCompatAPI(
   new Client({ auth: apiKey })
 );
@@ -18,6 +22,71 @@ export const getPageContentById = cache(async (id: string) => {
   const page = await notionClientForPageContent.getPage(id);
   return page;
 });
+
+// export const getPage = cache(async (pageId: string) => {
+//   const response = await notion.pages.retrieve({ page_id: pageId });
+//   return response;
+// });
+
+// export const getBlocks = cache(async (blockID: string) => {
+//   const blockId = blockID.replace(/-/g, "");
+
+//   const parentBlocks: any[] = [];
+//   let hasMore = true;
+//   let nextCursor = undefined;
+
+//   while (hasMore) {
+//     const { results, has_more, next_cursor } =
+//       await notion.blocks.children.list({
+//         block_id: blockId,
+//         page_size: 100,
+//         start_cursor: nextCursor ?? undefined,
+//       });
+//     parentBlocks.push(...results);
+//     hasMore = has_more;
+//     nextCursor = next_cursor;
+//   }
+
+//   // Fetches all child blocks recursively
+//   // be mindful of rate limits if you have large amounts of nested blocks
+//   // See https://developers.notion.com/docs/working-with-page-content#reading-nested-blocks
+//   const childBlocks: any = await Promise.all(
+//     parentBlocks.map(async (block) => {
+//       if ((block as any).has_children) {
+//         const children = await getBlocks(block.id);
+//         return { ...block, children };
+//       }
+//       return block;
+//     })
+//   );
+
+//   return childBlocks.reduce((acc: any[], curr: any) => {
+//     if (curr.type === "bulleted_list_item") {
+//       if (acc[acc.length - 1]?.type === "bulleted_list") {
+//         acc[acc.length - 1][acc[acc.length - 1].type].children?.push(curr);
+//       } else {
+//         acc.push({
+//           id: getRandomInt(10 ** 99, 10 ** 100).toString(),
+//           type: "bulleted_list",
+//           bulleted_list: { children: [curr] },
+//         });
+//       }
+//     } else if (curr.type === "numbered_list_item") {
+//       if (acc[acc.length - 1]?.type === "numbered_list") {
+//         acc[acc.length - 1][acc[acc.length - 1].type].children?.push(curr);
+//       } else {
+//         acc.push({
+//           id: getRandomInt(10 ** 99, 10 ** 100).toString(),
+//           type: "numbered_list",
+//           numbered_list: { children: [curr] },
+//         });
+//       }
+//     } else {
+//       acc.push(curr);
+//     }
+//     return acc;
+//   }, [] as any[]);
+// });
 
 export const getPagePropertiesBySlug = cache(async (slug: string) => {
   const results = await notion.databases.query({
@@ -132,6 +201,25 @@ export const getBlogPosts = cache(
     };
   }
 );
+
+export const getAllBlogPosts = cache(async () => {
+  let has_more = true;
+  let next_cursor: string | undefined = undefined;
+  let posts: BlogPost[] = [];
+
+  while (has_more) {
+    const {
+      posts: newPosts,
+      has_more: newHasMore,
+      next_cursor: newCursor,
+    } = await getBlogPosts(next_cursor, 100);
+    posts.push(...newPosts);
+    has_more = newHasMore;
+    next_cursor = newCursor;
+  }
+
+  return posts;
+});
 
 function getFullPlainTextString(title: any) {
   return title?.map((text: any) => text.plain_text).join(" ") ?? "Untitled";

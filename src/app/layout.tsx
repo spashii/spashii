@@ -6,9 +6,11 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Layout from "@/components/Layout";
 import "./globals.css";
+
 import "react-notion-x/src/styles.css";
 import "prismjs/themes/prism-tomorrow.css";
 import "katex/dist/katex.min.css";
+// import "@9gustin/react-notion-render/dist/index.css";
 
 const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 

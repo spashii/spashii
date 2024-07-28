@@ -38,7 +38,7 @@ const Page = async ({
   );
 
   return (
-    <div>
+    <div className="mb-16">
       <Link href="/">
         <Badge className="px-2 py-1 my-6">
           <CircleX className="inline-block w-4 h-4 mr-2" />

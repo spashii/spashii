@@ -1,4 +1,3 @@
-import Layout from "@/components/Layout";
 import { config } from "@/config";
 import { signOgImageUrl } from "@/lib/og-image";
 import Markdown from "react-markdown";

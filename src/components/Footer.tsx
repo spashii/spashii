@@ -10,7 +10,7 @@ import { SiGithub } from "@icons-pack/react-simple-icons";
 export const Footer: FunctionComponent = () => {
   return (
     <section>
-      <div className="flex items-center flex-wrap justify-between gap-2 pb-4">
+      <div className="flex items-center flex-wrap justify-between gap-2 pb-4 mx-4">
         <div className="text-sm text-muted-foreground">
           © {config.blog.copyright} {new Date().getFullYear()}
         </div>

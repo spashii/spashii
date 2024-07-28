@@ -20,7 +20,11 @@ export const DarkModeToggle = () => {
 
   const toggleDarkMode = () => {
     if (resolvedTheme === "dark") {
-      setIsModalOpen(true);
+      if (localStorage.getItem("alreadyConfirmed") === "true") {
+        setTheme("light");
+      } else {
+        setIsModalOpen(true);
+      }
     } else {
       setTheme("dark");
     }
@@ -28,6 +32,7 @@ export const DarkModeToggle = () => {
 
   const confirmToggle = () => {
     setTheme("light");
+    localStorage.setItem("alreadyConfirmed", "true");
     setIsModalOpen(false);
   };
 

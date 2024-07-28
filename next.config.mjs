@@ -21,7 +21,13 @@ const nextConfig = {
     ],
   },
   redirects: async () => {
-    return [];
+    return [
+      {
+        source: "/blog/tech-journal-is-live",
+        destination: "/blog/dev-journal-is-live",
+        permanent: true,
+      },
+    ];
   },
 };
 

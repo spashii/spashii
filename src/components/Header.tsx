@@ -11,14 +11,15 @@ import { cn } from "@/lib/utils";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FunctionComponent } from "react";
+import { FunctionComponent, Suspense, useEffect, useState } from "react";
+import { AquariumScene } from "./three/AquariumScene";
 interface MenuItem {
   name: string;
   href: string;
   openInNewTab?: boolean;
 }
 const menuItems: MenuItem[] = [
-  { name: "Blog", href: "/" },
+  { name: "Journal", href: "/" },
   { name: "Tags", href: "/tag" },
   { name: "About", href: "/about" },
 ];
@@ -80,15 +81,60 @@ export const Navigation: FunctionComponent = () => {
   );
 };
 
-export const Header: FunctionComponent = () => {
+export const Header: React.FC = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <section className="flex items-center justify-between mt-8 md:mt-16 mb-12">
-      <Link href="/">
-        <h1 className="text-4xl font-bold tracking-tighter leading-tight">
-          {config.blog.name}
-        </h1>
-      </Link>
-      <Navigation />
-    </section>
+    <header
+      className={cn(
+        `fixed top-0 left-0 right-0 z-50 transition-all duration-400`,
+        isScrolled
+          ? "bg-white/70 dark:bg-black/70 backdrop-blur-md shadow-md py-0 border-b dark:border-gray-800"
+          : "bg-transparent py-4 md:py-8"
+      )}
+    >
+      <div className="mx-auto px-4 md:px-8">
+        <section className="flex items-center justify-between">
+          <div className="flex items-center justify-center gap-2">
+            <Suspense
+              fallback={
+                <div
+                  className={`h-[${isScrolled ? "50px" : "100px"}] w-[${
+                    isScrolled ? "50px" : "100px"
+                  }]`}
+                />
+              }
+            >
+              <div
+                className={cn(
+                  "transition-all duration-300 !cursor-crosshair w-[100px] h-[100px]"
+                )}
+              >
+                <AquariumScene />
+              </div>
+            </Suspense>
+            <Link href="/">
+              <h1
+                className={`font-bold tracking-tighter leading-tight transition-all duration-300 ${
+                  isScrolled ? "text-xl" : "text-2xl"
+                }`}
+              >
+                {config.blog.name}
+              </h1>
+            </Link>
+          </div>
+          <Navigation />
+        </section>
+      </div>
+    </header>
   );
 };

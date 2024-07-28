@@ -26,7 +26,9 @@ export const Confetti = () => {
             value: 80,
           },
           color: {
-            value: ["#00FFFC", "#FC00FF", "#fffc00"],
+            // value: ["#00FFFC", "#FC00FF", "#fffc00"],
+            // only grays
+            value: ["#000000", "#888888", "#ffffff"],
           },
           shape: {
             type: ["circle", "square"],
@@ -39,7 +41,7 @@ export const Confetti = () => {
             },
             animation: {
               enable: true,
-              speed: 2,
+              speed: 1,
               startValue: "max",
               destroy: "min",
             },
@@ -64,7 +66,7 @@ export const Confetti = () => {
             enable: true,
             gravity: {
               enable: true,
-              acceleration: 10,
+              acceleration: 1,
             },
             speed: {
               min: 10,

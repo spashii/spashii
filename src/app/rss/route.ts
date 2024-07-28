@@ -15,7 +15,7 @@ export async function GET() {
     return {
       title: post.title,
       description: post.description || "",
-      url: urlJoin(baseUrl, `/blog/id/${post.id}`),
+      url: urlJoin(baseUrl, `/journal/id/${post.id}`),
       date: post.publishedAt || new Date(),
     };
   });

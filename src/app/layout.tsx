@@ -40,7 +40,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={cn("bg-background font-sans antialiased", fontSans.variable)}
+        className={cn(
+          "bg-background font-sans antialiased transition-colors",
+          fontSans.variable
+        )}
       >
         <ThemeProvider attribute="class" enableSystem>
           <Layout>{children}</Layout>

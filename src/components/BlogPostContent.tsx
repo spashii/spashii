@@ -71,7 +71,7 @@ export const BlogPostContent = ({
           rootDomain="https://www.notion.so"
           rootPageId={pageProperties.id}
           mapPageUrl={(pageId) => {
-            return `/blog/id/${encodeURIComponent(pageId)}`;
+            return `/journal/id/${encodeURIComponent(pageId)}`;
           }}
           mapImageUrl={(url) => {
             return url;

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { NotionRenderer } from "react-notion-x";
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
+import Image from "next/image";
 // import { Render } from "@9gustin/react-notion-render";
 
 const Code = dynamic(() =>
@@ -61,6 +62,8 @@ export const BlogPostContent = ({
             Equation,
             Modal,
             Pdf,
+            nextImage: Image,
+            nextLink: Link,
           }}
         />
       </div>

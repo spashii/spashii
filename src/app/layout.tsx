@@ -7,10 +7,9 @@ import { Inter } from "next/font/google";
 import Layout from "@/components/Layout";
 import "./globals.css";
 
-import "react-notion-x/src/styles.css";
+// import "react-notion-x/src/styles.css";
 import "prismjs/themes/prism-tomorrow.css";
-import "katex/dist/katex.min.css";
-// import "@9gustin/react-notion-render/dist/index.css";
+// import "katex/dist/katex.min.css";
 
 const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -42,7 +41,7 @@ export default function RootLayout({
       <body
         className={cn("bg-background font-sans antialiased", fontSans.variable)}
       >
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <ThemeProvider attribute="class" enableSystem>
           <Layout>{children}</Layout>
         </ThemeProvider>
       </body>

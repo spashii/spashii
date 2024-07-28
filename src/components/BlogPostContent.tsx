@@ -1,34 +1,34 @@
 "use client";
 import Link from "next/link";
-import { NotionRenderer } from "react-notion-x";
-import dynamic from "next/dynamic";
+// import { NotionRenderer } from "react-notion-x";
+// import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
-import Image from "next/image";
-// import { Render } from "@9gustin/react-notion-render";
+// import Image from "next/image";
+import { Render } from "@9gustin/react-notion-render";
 
-const Code = dynamic(() =>
-  import("react-notion-x/build/third-party/code").then((m) => m.Code)
-);
-const Collection = dynamic(() =>
-  import("react-notion-x/build/third-party/collection").then(
-    (m) => m.Collection
-  )
-);
-const Equation = dynamic(() =>
-  import("react-notion-x/build/third-party/equation").then((m) => m.Equation)
-);
-const Pdf = dynamic(
-  () => import("react-notion-x/build/third-party/pdf").then((m) => m.Pdf),
-  {
-    ssr: false,
-  }
-);
-const Modal = dynamic(
-  () => import("react-notion-x/build/third-party/modal").then((m) => m.Modal),
-  {
-    ssr: false,
-  }
-);
+// const Code = dynamic(() =>
+//   import("react-notion-x/build/third-party/code").then((m) => m.Code)
+// );
+// const Collection = dynamic(() =>
+//   import("react-notion-x/build/third-party/collection").then(
+//     (m) => m.Collection
+//   )
+// );
+// const Equation = dynamic(() =>
+//   import("react-notion-x/build/third-party/equation").then((m) => m.Equation)
+// );
+// const Pdf = dynamic(
+//   () => import("react-notion-x/build/third-party/pdf").then((m) => m.Pdf),
+//   {
+//     ssr: false,
+//   }
+// );
+// const Modal = dynamic(
+//   () => import("react-notion-x/build/third-party/modal").then((m) => m.Modal),
+//   {
+//     ssr: false,
+//   }
+// );
 
 export const BlogPostContent = ({
   pageProperties,
@@ -44,15 +44,19 @@ export const BlogPostContent = ({
   const { title, publishedAt, createdAt, tags } = pageProperties;
 
   return (
-    <div className="space-y-4 mb-16">
+    <div className="mb-16 grid grid-cols-1 gap-6 mx-auto items-center max-w-prose">
       <h1 className="text-4xl font-semibold">{title}</h1>
 
-      <div key={theme.resolvedTheme}>
-        {/* <Render blocks={pageContent} useStyles classNames /> */}
+      <div
+        key={theme.resolvedTheme}
+        className="prose prose-slate p-0  w-full dark:prose-invert "
+      >
+        <Render blocks={pageContent} blockComponentsMapper={{}} />
 
-        <NotionRenderer
+        {/* <NotionRenderer
           darkMode={theme.resolvedTheme === "dark"}
           recordMap={pageContent}
+          forceCustomImages={true}
           isImageZoomable={true}
           disableHeader
           className="!p-0 !max-w-prose !w-full !grid !grid-cols-1 !gap-4"
@@ -62,10 +66,10 @@ export const BlogPostContent = ({
             Equation,
             Modal,
             Pdf,
-            nextImage: Image,
-            nextLink: Link,
+            // nextImage: Image,
+            // nextLink: Link,
           }}
-        />
+        /> */}
       </div>
       <div className="text-sm opacity-40">
         {Intl.DateTimeFormat("en-US").format(

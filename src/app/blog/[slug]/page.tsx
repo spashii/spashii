@@ -3,8 +3,9 @@ import { RelatedPosts } from "@/components/RelatedPosts";
 import { config } from "@/config";
 import {
   getAllBlogPosts,
+  getBlocks,
   getPageContentById,
-  // getBlocks,
+  // getPageContentById,
   getPagePropertiesBySlug,
   getRelatedPostsBySlug,
 } from "@/lib/notion";
@@ -19,11 +20,6 @@ export const revalidate = 1800;
 export async function generateStaticParams() {
   // Fetch all possible slugs
   const results = await getAllBlogPosts();
-
-  console.log(
-    "render pages",
-    results.map(({ slug }) => slug)
-  );
 
   // Generate static paths
   return results.map(({ slug }) => ({
@@ -65,8 +61,8 @@ const Page = async ({ params: { slug } }: { params: Params }) => {
   }
 
   const [pageContent, relatedPosts] = await Promise.all([
-    // getBlocks(pageProperties.id),
-    getPageContentById(pageProperties.id),
+    getBlocks(pageProperties.id),
+    // getPageContentById(pageProperties.id),
     getRelatedPostsBySlug(slug),
   ]);
 

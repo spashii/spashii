@@ -12,7 +12,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "notion.so",
+        hostname: "www.notion.so",
       },
     ],
   },

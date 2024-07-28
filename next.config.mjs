@@ -14,6 +14,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "www.notion.so",
       },
+      {
+        protocol: "https",
+        hostname: "http.cat",
+      },
     ],
   },
   redirects: async () => {

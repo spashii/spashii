@@ -1,6 +1,5 @@
 import { config } from "@/config";
 import { getBlogPosts } from "@/lib/notion";
-import { wisp } from "@/lib/wisp";
 import type { MetadataRoute } from "next";
 import urlJoin from "url-join";
 

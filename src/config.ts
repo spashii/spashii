@@ -8,7 +8,7 @@ const buildConfig = () => {
     process.env.NEXT_DEFAULT_METADATA_DEFAULT_TITLE || "spashii.dev";
   const defaultDescription =
     process.env.NEXT_PUBLIC_BLOG_DESCRIPTION ||
-    "Everyone's welcome (yes, even you)";
+    "Tech journal, blog and a colection of notes. Built on Next.js, Notion API and Vercel.";
 
   return {
     revalidateSeconds: 1800,
@@ -28,9 +28,6 @@ const buildConfig = () => {
     ogImageSecret:
       process.env.OG_IMAGE_SECRET ||
       "secret_used_for_signing_and_verifying_the_og_image_url_by_spashii",
-    wisp: {
-      blogId,
-    },
   };
 };
 

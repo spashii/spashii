@@ -2,7 +2,6 @@ import { BlogPostPreviewGrid } from "@/components/BlogPostPreview";
 
 import { Badge } from "@/components/ui/badge";
 import { getAllBlogPosts } from "@/lib/notion";
-import { wisp } from "@/lib/wisp";
 import { CircleX } from "lucide-react";
 import Link from "next/link";
 

@@ -3,15 +3,15 @@ export const revalidate = 60 * 60; // 1 hour
 import { NextResponse } from "next/server";
 import RSS from "rss";
 import urlJoin from "url-join";
-import { wisp } from "../../lib/wisp";
 import { config } from "@/config";
+import { getAllBlogPosts } from "@/lib/notion";
 
 const baseUrl = config.baseUrl;
 
 export async function GET() {
-  const result = await wisp.getPosts({ limit: 20 });
+  const result = await getAllBlogPosts();
 
-  const posts = result.posts.map((post) => {
+  const posts = result.map((post) => {
     return {
       title: post.title,
       description: post.description || "",

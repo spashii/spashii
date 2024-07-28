@@ -2,7 +2,6 @@ import "server-only";
 
 import { cache } from "react";
 import { Client } from "@notionhq/client";
-import { getRandomInt } from "./utils";
 // @ts-ignore
 import { NotionCompatAPI } from "notion-compat";
 
@@ -18,76 +17,33 @@ const notionClientForPageContent = new NotionCompatAPI(
   new Client({ auth: apiKey })
 );
 
-export const getPageContentById = cache(async (id: string) => {
-  const page = await notionClientForPageContent.getPage(id);
-  return page;
-});
+export const getPagePropertiesById = cache(async (id: string) => {
+  const page = await notion.pages.retrieve({ page_id: id });
 
-export const getPage = cache(async (pageId: string) => {
-  const response = await notion.pages.retrieve({ page_id: pageId });
-  return response;
-});
-
-export const getBlocks = cache(async (blockID: string) => {
-  const blockId = blockID.replace(/-/g, "");
-
-  const parentBlocks: any[] = [];
-  let hasMore = true;
-  let nextCursor = undefined;
-
-  while (hasMore) {
-    const { results, has_more, next_cursor } =
-      await notion.blocks.children.list({
-        block_id: blockId,
-        page_size: 100,
-        start_cursor: nextCursor ?? undefined,
-      });
-    parentBlocks.push(...results);
-    hasMore = has_more;
-    nextCursor = next_cursor;
+  if (!page) {
+    throw new Error("Post not found");
   }
 
-  // Fetches all child blocks recursively
-  // be mindful of rate limits if you have large amounts of nested blocks
-  // See https://developers.notion.com/docs/working-with-page-content#reading-nested-blocks
-  const childBlocks: any = await Promise.all(
-    parentBlocks.map(async (block) => {
-      if ((block as any).has_children) {
-        const children = await getBlocks(block.id);
-        return { ...block, children };
-      }
-      return block;
-    })
-  );
+  // @ts-ignore
+  if (!page.properties.Publish.checkbox) {
+    throw new Error(`Page is not published: ${id}`);
+  }
 
-  return childBlocks;
+  return notionToBlogPost(page);
+});
 
-  return childBlocks.reduce((acc: any[], curr: any) => {
-    if (curr.type === "bulleted_list_item") {
-      if (acc[acc.length - 1]?.type === "bulleted_list") {
-        acc[acc.length - 1][acc[acc.length - 1].type].children?.push(curr);
-      } else {
-        acc.push({
-          id: getRandomInt(10 * 99, 10 * 100).toString(),
-          type: "bulleted_list",
-          bulleted_list: { children: [curr] },
-        });
-      }
-    } else if (curr.type === "numbered_list_item") {
-      if (acc[acc.length - 1]?.type === "numbered_list") {
-        acc[acc.length - 1][acc[acc.length - 1].type].children?.push(curr);
-      } else {
-        acc.push({
-          id: getRandomInt(10 * 99, 10 * 100).toString(),
-          type: "numbered_list",
-          numbered_list: { children: [curr] },
-        });
-      }
-    } else {
-      acc.push(curr);
-    }
-    return acc;
-  }, [] as any[]);
+export const getPageContentById = cache(async (id: string) => {
+  const page = await notionClientForPageContent.getPage(id);
+
+  if (!page) {
+    throw new Error("Post not found");
+  }
+
+  if (!page.raw.page.properties.Publish.checkbox) {
+    throw new Error(`Page is not published: ${id}`);
+  }
+
+  return page;
 });
 
 export const getPagePropertiesBySlug = cache(async (slug: string) => {
@@ -133,12 +89,14 @@ export const getRelatedPostsBySlug = cache(
       filter: {
         and: [
           {
-            or: post.tags.map((tag) => ({
-              property: "Tags",
-              multi_select: {
-                contains: tag.id,
-              },
-            })),
+            or: [
+              ...post.tags.map((tag) => ({
+                property: "Tags",
+                multi_select: {
+                  contains: tag.name,
+                },
+              })),
+            ],
           },
           {
             property: "Publish",

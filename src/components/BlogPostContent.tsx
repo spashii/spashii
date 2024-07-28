@@ -1,34 +1,37 @@
 "use client";
 import Link from "next/link";
-// import { NotionRenderer } from "react-notion-x";
-// import dynamic from "next/dynamic";
+import { NotionRenderer } from "react-notion-x";
+import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
-// import Image from "next/image";
-import { Render } from "@9gustin/react-notion-render";
+import Image from "next/image";
 
-// const Code = dynamic(() =>
-//   import("react-notion-x/build/third-party/code").then((m) => m.Code)
-// );
-// const Collection = dynamic(() =>
-//   import("react-notion-x/build/third-party/collection").then(
-//     (m) => m.Collection
-//   )
-// );
-// const Equation = dynamic(() =>
-//   import("react-notion-x/build/third-party/equation").then((m) => m.Equation)
-// );
-// const Pdf = dynamic(
-//   () => import("react-notion-x/build/third-party/pdf").then((m) => m.Pdf),
-//   {
-//     ssr: false,
-//   }
-// );
-// const Modal = dynamic(
-//   () => import("react-notion-x/build/third-party/modal").then((m) => m.Modal),
-//   {
-//     ssr: false,
-//   }
-// );
+import { useEffect, useState } from "react";
+import Loading from "@/app/loading";
+
+const Code = dynamic(() =>
+  import("react-notion-x/build/third-party/code").then((m) => m.Code)
+);
+
+const Collection = dynamic(() =>
+  import("react-notion-x/build/third-party/collection").then(
+    (m) => m.Collection
+  )
+);
+const Equation = dynamic(() =>
+  import("react-notion-x/build/third-party/equation").then((m) => m.Equation)
+);
+const Pdf = dynamic(
+  () => import("react-notion-x/build/third-party/pdf").then((m) => m.Pdf),
+  {
+    ssr: false,
+  }
+);
+const Modal = dynamic(
+  () => import("react-notion-x/build/third-party/modal").then((m) => m.Modal),
+  {
+    ssr: false,
+  }
+);
 
 export const BlogPostContent = ({
   pageProperties,
@@ -39,7 +42,17 @@ export const BlogPostContent = ({
 }) => {
   const theme = useTheme();
 
+  const [darkMode, setDarkMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    setDarkMode(theme.resolvedTheme === "dark");
+    setLoading(false);
+  }, [theme.resolvedTheme, setLoading]);
+
   if (!pageProperties) return null;
+  if (loading) return <Loading />;
 
   const { title, publishedAt, createdAt, tags } = pageProperties;
 
@@ -48,28 +61,33 @@ export const BlogPostContent = ({
       <h1 className="text-4xl font-semibold">{title}</h1>
 
       <div
-        key={theme.resolvedTheme}
+        key={darkMode ? "dark" : "light"}
         className="prose prose-slate p-0  w-full dark:prose-invert "
       >
-        <Render blocks={pageContent} blockComponentsMapper={{}} />
+        {/* <Render blocks={pageContent} blockComponentsMapper={{}} /> */}
 
-        {/* <NotionRenderer
-          darkMode={theme.resolvedTheme === "dark"}
+        <NotionRenderer
+          darkMode={darkMode}
           recordMap={pageContent}
-          forceCustomImages={true}
+          rootDomain="https://www.notion.so"
+          rootPageId={pageProperties.id}
+          mapPageUrl={(pageId) => {
+            return `/blog/id/${encodeURIComponent(pageId)}`;
+          }}
+          mapImageUrl={(url) => {
+            return url;
+          }}
           isImageZoomable={true}
-          disableHeader
-          className="!p-0 !max-w-prose !w-full !grid !grid-cols-1 !gap-4"
           components={{
             Code,
             Collection,
             Equation,
             Modal,
             Pdf,
-            // nextImage: Image,
-            // nextLink: Link,
+            nextLink: Link,
+            nextImage: Image,
           }}
-        /> */}
+        />
       </div>
       <div className="text-sm opacity-40">
         {Intl.DateTimeFormat("en-US").format(

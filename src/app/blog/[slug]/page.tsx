@@ -3,7 +3,6 @@ import { RelatedPosts } from "@/components/RelatedPosts";
 import { config } from "@/config";
 import {
   getAllBlogPosts,
-  getBlogPosts,
   getPageContentById,
   // getBlocks,
   getPagePropertiesBySlug,
@@ -14,16 +13,22 @@ import { notFound } from "next/navigation";
 import type { BlogPosting, WithContext } from "schema-dts";
 
 // revalidate
+export const dynamic = "force-static";
 export const revalidate = 1800;
-export const dynamicParams = false;
 
 export async function generateStaticParams() {
   // Fetch all possible slugs
   const results = await getAllBlogPosts();
-  const slugs = results.map((post) => post.slug);
+
+  console.log(
+    "render pages",
+    results.map(({ slug }) => slug)
+  );
 
   // Generate static paths
-  return slugs.map((slug) => ({ params: { slug } }));
+  return results.map(({ slug }) => ({
+    params: { slug },
+  }));
 }
 
 export async function generateMetadata({
@@ -32,11 +37,6 @@ export async function generateMetadata({
   params: Params;
 }) {
   const result = await getPagePropertiesBySlug(slug);
-  if (!result) {
-    return {
-      title: "Blog post not found",
-    };
-  }
 
   const { title, description, image } = result;
   const generatedOgImage = signOgImageUrl({ title, brand: config.blog.name });
@@ -51,14 +51,16 @@ export async function generateMetadata({
     },
   };
 }
+
 interface Params {
   slug: string;
 }
 
 const Page = async ({ params: { slug } }: { params: Params }) => {
-  const pageProperties = await getPagePropertiesBySlug(slug);
-
-  if (!pageProperties) {
+  let pageProperties: BlogPost;
+  try {
+    pageProperties = await getPagePropertiesBySlug(slug);
+  } catch {
     return notFound();
   }
 

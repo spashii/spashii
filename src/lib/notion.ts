@@ -112,7 +112,7 @@ export const getPagePropertiesBySlug = cache(async (slug: string) => {
   });
 
   if (results.results.length === 0) {
-    return null;
+    throw new Error("Post not found");
   }
 
   return notionToBlogPost(results.results[0]);

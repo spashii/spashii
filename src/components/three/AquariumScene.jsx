@@ -1,8 +1,8 @@
 "use client";
 import { useLayoutEffect, useEffect, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useMask, useGLTF, useAnimations, Float, Instance, Instances, CameraControls } from '@react-three/drei'
-import { Lightformer, Environment, RandomizedLight, AccumulativeShadows, MeshTransmissionMaterial } from '@react-three/drei'
+import { useMask, useGLTF, useAnimations, Float, CameraControls } from '@react-three/drei'
+import { Lightformer, Environment, MeshTransmissionMaterial } from '@react-three/drei'
 
 export function AquariumScene() {
   return (

@@ -45,16 +45,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" enableSystem>
           <Layout>{children}</Layout>
         </ThemeProvider>
-        <Analytics
-          beforeSend={(event) => {
-            const url = new URL(event.url);
-            url.searchParams.delete("secret");
-            return {
-              ...event,
-              url: url.toString(),
-            };
-          }}
-        />
+        <Analytics />
       </body>
     </html>
   );

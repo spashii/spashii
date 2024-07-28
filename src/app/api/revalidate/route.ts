@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const secret = request.nextUrl.searchParams.get("secret");
+  const path = request.nextUrl.searchParams.get("path");
 
   if (secret !== REVALIDATE_SECRET) {
     return Response.json({
@@ -19,12 +20,16 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // all paths
   revalidatePath("/");
+
+  if (path) {
+    // specific path
+    revalidatePath(path, "page");
+  }
 
   return Response.json({
     revalidated: true,
     now: Date.now(),
-    message: "Revalidated",
+    message: "Revalidated " + (path ? path : "/"),
   });
 }

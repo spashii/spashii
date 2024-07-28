@@ -52,7 +52,7 @@ export default async function Page() {
               href={`/tag/${tag}`}
               className="text-primary inline-block"
             >
-              #{tag} ({count})
+              {tag} ({count})
             </Link>
           ))}
       </div>

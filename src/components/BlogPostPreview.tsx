@@ -21,7 +21,7 @@ export const BlogPostPreview: FunctionComponent<{
           />
         </div>
       </Link>
-      <div className="grid grid-cols-1 gap-3 md:col-span-2 mt-4">
+      <div className="grid grid-cols-1 gap-2 md:col-span-2 mt-4">
         <h2
           className={cn(
             "font-sans font-semibold tracking-tighter text-primary",
@@ -36,9 +36,9 @@ export const BlogPostPreview: FunctionComponent<{
         <div className="prose lg:prose-lg leading-relaxed md:text-lg line-clamp-4 text-muted-foreground">
           {post.description}
         </div>
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground flex flex-wrap gap-2">
           {post.tags.map((tag) => (
-            <div key={tag.id} className="mr-2 inline-block">
+            <div key={tag.id} className="inline-block">
               <Link href={`/tag/${tag.name}`}>#{tag.name}</Link>
             </div>
           ))}
@@ -55,7 +55,7 @@ export const BlogPostPreviewGrid: FunctionComponent<{
   return (
     <div
       className={cn(
-        "grid grid-cols-1 gap-16 lg:gap-28 md:grid-cols-2",
+        "grid grid-cols-1 gap-12 lg:gap-28 md:grid-cols-2",
         className
       )}
     >

@@ -46,24 +46,6 @@ export const BlogPostContent = ({
     <div className="space-y-4 mb-16">
       <h1 className="text-4xl font-semibold">{title}</h1>
 
-      <div className="text-sm opacity-40">
-        {Intl.DateTimeFormat("en-US").format(
-          new Date(publishedAt || createdAt)
-        )}
-      </div>
-
-      <div className="opacity-40 text-sm">
-        {tags.map((tag) => (
-          <Link
-            key={tag.id}
-            href={`/tag/${tag.name}`}
-            className="text-primary mr-2"
-          >
-            #{tag.name}
-          </Link>
-        ))}
-      </div>
-
       <div key={theme.resolvedTheme}>
         {/* <Render blocks={pageContent} useStyles classNames /> */}
 
@@ -81,6 +63,23 @@ export const BlogPostContent = ({
             Pdf,
           }}
         />
+      </div>
+      <div className="text-sm opacity-40">
+        {Intl.DateTimeFormat("en-US").format(
+          new Date(publishedAt || createdAt)
+        )}
+      </div>
+
+      <div className="opacity-40 text-sm">
+        {tags.map((tag) => (
+          <Link
+            key={tag.id}
+            href={`/tag/${tag.name}`}
+            className="text-primary mr-2"
+          >
+            #{tag.name}
+          </Link>
+        ))}
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Layout from "@/components/Layout";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/react";
 
 import "react-notion-x/src/styles.css";
 import "prismjs/themes/prism-tomorrow.css";
@@ -44,6 +45,16 @@ export default function RootLayout({
         <ThemeProvider attribute="class" enableSystem>
           <Layout>{children}</Layout>
         </ThemeProvider>
+        <Analytics
+          beforeSend={(event) => {
+            const url = new URL(event.url);
+            url.searchParams.delete("secret");
+            return {
+              ...event,
+              url: url.toString(),
+            };
+          }}
+        />
       </body>
     </html>
   );

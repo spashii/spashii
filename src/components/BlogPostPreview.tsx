@@ -15,7 +15,7 @@ export const BlogPostPreview: FunctionComponent<{
         <div className="aspect-[16/9] relative">
           <Image
             alt={post.title}
-            className="object-cover"
+            className="object-cover rounded-md"
             src={post.image || "/images/placeholder.webp"}
             fill
           />

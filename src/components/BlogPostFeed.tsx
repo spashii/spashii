@@ -15,11 +15,13 @@ export default function BlogPostFeed({
   initialNextCursor,
 }: PostListProps) {
   const [posts, setPosts] = useState<BlogPost[]>(initialPosts);
+  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>(initialPosts);
   const [nextCursor, setNextCursor] = useState<string | undefined>(
     initialNextCursor
   );
   const [isLoading, setIsLoading] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const scrollTrigger = useRef<HTMLDivElement>(null);
   const endMessageRef = useRef<HTMLParagraphElement>(null);
 
@@ -41,6 +43,7 @@ export default function BlogPostFeed({
         const { posts: newPosts, next_cursor } =
           (await response.json()) as unknown as GetPostsResponse;
         setPosts((prevPosts) => [...prevPosts, ...newPosts]);
+        setFilteredPosts((prevPosts) => [...prevPosts, ...newPosts]);
         setNextCursor(next_cursor);
       } catch (error) {
         console.error("Error loading more posts:", error);
@@ -94,9 +97,33 @@ export default function BlogPostFeed({
     };
   }, [nextCursor]);
 
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredPosts(posts);
+    } else {
+      const query = searchQuery.toLowerCase();
+      const filtered = posts.filter(
+        (post) =>
+          post.title.toLowerCase().includes(query) ||
+          post.description?.toLowerCase().includes(query) ||
+          post.tags.some((tag) => tag.name.toLowerCase().includes(query))
+      );
+      setFilteredPosts(filtered);
+    }
+  }, [searchQuery, posts]);
+
   return (
     <>
-      <BlogPostPreviewGrid posts={posts} />
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border p-2 w-full rounded-md"
+        />
+      </div>
+      <BlogPostPreviewGrid posts={filteredPosts} />
       <div className="text-center text-slate-600 my-12">
         <div className="relative py-8">
           {nextCursor ? (
@@ -110,7 +137,7 @@ export default function BlogPostFeed({
               <p className="text-slate-600 relative z-10" ref={endMessageRef}>
                 Congrats, you&apos;ve hit the end!
               </p>
-              {showConfetti && posts.length > 5 && (
+              {showConfetti && filteredPosts.length > 5 && (
                 <div className="absolute inset-0 z-50">
                   <Confetti />
                 </div>

@@ -77,25 +77,10 @@
   }
 }
 
-/* .notion .notion-code > pre {
-  max-width: 100%;
-  min-height: 250px;
-}
-
-.notion .notion-code > pre > code {
-  max-width: 100%;
-  overflow-x: auto;
-} 
-
 .notion-code-copy-button {
   padding: 0.2em !important;
 }
-*/
 
-.title {
-  text-decoration: none !important;
-
-  &:hover {
-    text-decoration: underline !important;
-  }
+.notion-page {
+  padding: 0 !important;
 }

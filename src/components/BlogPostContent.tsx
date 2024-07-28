@@ -7,6 +7,7 @@ import Image from "next/image";
 
 import { useEffect, useState } from "react";
 import Loading from "@/app/loading";
+import { formatDate } from "date-fns";
 
 const Code = dynamic(() =>
   import("react-notion-x/build/third-party/code").then((m) => m.Code)
@@ -54,11 +55,9 @@ export const BlogPostContent = ({
   if (!pageProperties) return null;
   if (loading) return <Loading />;
 
-  const { title, publishedAt, createdAt, tags } = pageProperties;
-
   return (
-    <div className="mb-16 grid grid-cols-1 gap-6 mx-auto items-center max-w-prose">
-      <h1 className="text-4xl font-semibold">{title}</h1>
+    <div className="mb-16 grid grid-cols-1 gap-4 mx-auto items-center max-w-prose">
+      <h1 className="text-4xl font-semibold">{pageProperties.title}</h1>
 
       <div
         key={darkMode ? "dark" : "light"}
@@ -89,21 +88,17 @@ export const BlogPostContent = ({
           }}
         />
       </div>
-      <div className="text-sm opacity-40">
-        {Intl.DateTimeFormat("en-US").format(
-          new Date(publishedAt || createdAt)
+      <div className="prose lg:prose-lg italic tracking-tighter text-muted-foreground">
+        {formatDate(
+          pageProperties.publishedAt || pageProperties.updatedAt,
+          "dd MMMM yyyy"
         )}
       </div>
-
-      <div className="opacity-40 text-sm">
-        {tags.map((tag) => (
-          <Link
-            key={tag.id}
-            href={`/tag/${tag.name}`}
-            className="text-primary mr-2"
-          >
-            #{tag.name}
-          </Link>
+      <div className="text-sm text-muted-foreground flex flex-wrap gap-2">
+        {pageProperties.tags.map((tag) => (
+          <div key={tag.id} className="inline-block">
+            <Link href={`/tag/${tag.name}`}>#{tag.name}</Link>
+          </div>
         ))}
       </div>
     </div>

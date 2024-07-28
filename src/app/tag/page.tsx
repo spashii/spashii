@@ -26,27 +26,33 @@ export async function generateMetadata() {
 export default async function Page() {
   const allPosts = await getAllBlogPosts();
 
-  const tags = new Set<string>();
+  const tagCounts = new Map<string, number>();
   allPosts.forEach((post) => {
-    post.tags.forEach((tag) => tags.add(tag.name));
+    post.tags.forEach((tag) => {
+      if (tagCounts.has(tag.name)) {
+        tagCounts.set(tag.name, (tagCounts.get(tag.name) ?? 0) + 1);
+      } else {
+        tagCounts.set(tag.name, 1);
+      }
+    });
   });
 
   return (
     <div>
-      <div className="">
+      <div className="text-center">
         <h1 className="mb-2 text-5xl font-bold">Tags</h1>
         <p className="text-lg opacity-50">List of all tags</p>
       </div>
-      <div className="my-10 max-w-6xl text-balance text-center text-xl mb-48 flex gap-8 flex-wrap">
-        {Array.from(tags)
-          .sort()
-          .map((tag) => (
+      <div className="my-10 max-w-6xl text-center text-xl mb-48 flex gap-8 flex-wrap justify-center">
+        {Array.from(tagCounts.entries())
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map(([tag, count]) => (
             <Link
               key={tag}
               href={`/tag/${tag}`}
               className="text-primary inline-block"
             >
-              #{tag}
+              #{tag} ({count})
             </Link>
           ))}
       </div>

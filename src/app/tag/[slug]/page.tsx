@@ -23,13 +23,7 @@ export async function generateMetadata({
   };
 }
 
-const Page = async ({
-  params: { slug },
-  searchParams,
-}: {
-  params: Params;
-  searchParams: { [key: string]: string | string[] | undefined };
-}) => {
+const Page = async ({ params: { slug } }: { params: Params }) => {
   const allPosts = await getAllBlogPosts();
 
   const results = allPosts.filter((post) =>

@@ -120,7 +120,7 @@ export default function BlogPostFeed({
           placeholder="Search..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border p-2 w-full rounded-md"
+          className="border p-2 w-full rounded-md mb-6 lg:mb-12"
         />
       </div>
       <BlogPostPreviewGrid posts={filteredPosts} />

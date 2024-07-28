@@ -186,7 +186,7 @@ function getFullPlainTextString(title: any) {
 }
 
 export function notionToBlogPost(notionData: any): BlogPost {
-  const wispObject = {
+  const post = {
     id: notionData.id,
     createdAt: new Date(notionData.created_time),
     teamId: notionData.created_by?.id ?? "",
@@ -208,5 +208,5 @@ export function notionToBlogPost(notionData: any): BlogPost {
       })) ?? [],
   };
 
-  return wispObject;
+  return post;
 }

@@ -8,7 +8,7 @@ export function AquariumScene() {
   return (
     <Canvas shadows camera={{ position: [30, 0, -3], fov: 35, near: 1, far: 50 }}>
       {/** Glass aquarium */}
-      <Aquarium position={[0, 0.25, 0]}>
+      <Aquarium position={[0, 0.25, 0]} rotation={[0.4, 0.5, 0.2]}>
         <Float rotationIntensity={2} floatIntensity={10} speed={2}>
           <Turtle position={[0, -0.5, -1]} rotation={[0, Math.PI, 0]} scale={23} />
         </Float>
@@ -48,7 +48,7 @@ function Aquarium({ children, ...props }) {
   useFrame(({ clock }) => {
     mesh.current.rotation.y = Math.sin(clock.getElapsedTime() / 2) / 10;
     mesh.current.rotation.z = Math.sin(clock.getElapsedTime() / 2) / 5;
-    mesh.current.position.x = Math.sin(clock.getElapsedTime() / 2) / 10;
+    mesh.current.rotation.x = Math.sin(clock.getElapsedTime() / 2) / 10;
   })
 
   return (

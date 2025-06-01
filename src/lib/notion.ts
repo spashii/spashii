@@ -1,97 +1,102 @@
-import "server-only";
-
-import { cache } from "react";
-import { Client } from "@notionhq/client";
+import { cache } from 'react'
+import { Client } from '@notionhq/client'
 // @ts-ignore
-import { NotionCompatAPI } from "notion-compat";
+import { NotionCompatAPI } from 'notion-compat'
 
-const apiKey = process.env.NOTION_API_KEY;
+const NOTION_API_KEY = import.meta.env.NOTION_API_KEY
+const NOTION_DATABASE_ID = import.meta.env.NOTION_DATABASE_ID
+const NOTION_PROJECT_ID = import.meta.env.NOTION_PROJECT_ID
 
-if (!apiKey) {
-  throw new Error("NOTION_API_KEY is not set");
+if (import.meta.env.NOTION_API_KEY == null) {
+  throw new Error('Missing NOTION_API_KEY environment variable.')
+}
+if (import.meta.env.NOTION_DATABASE_ID == null) {
+  throw new Error('Missing NOTION_DATABASE_ID environment variable.')
+}
+if (import.meta.env.NOTION_PROJECT_ID == null) {
+  throw new Error('Missing NOTION_PROJECT_ID environment variable.')
 }
 
-const notion = new Client({ auth: apiKey });
+const notion = new Client({ auth: NOTION_API_KEY })
 
 const notionClientForPageContent = new NotionCompatAPI(
-  new Client({ auth: apiKey })
-);
+  new Client({ auth: NOTION_API_KEY }),
+)
+
+export interface JournalPost {
+  id: string
+  createdAt: string
+  teamId: string
+  title: string
+  description: string
+  slug: string
+  image: string
+  authorId: string
+  updatedAt: string
+  publishedAt: string | null
+  tags: { id: string; name: string }[]
+}
 
 export const getPagePropertiesById = cache(async (id: string) => {
-  const page = await notion.pages.retrieve({ page_id: id });
+  const page = await notion.pages.retrieve({ page_id: id })
 
   if (!page) {
-    throw new Error("Post not found");
+    throw new Error('Post not found')
   }
 
   // @ts-ignore
   if (!page.properties.Publish.checkbox) {
-    throw new Error(`Page is not published: ${id}`);
+    throw new Error(`Page is not published: ${id}`)
   }
 
-  return notionToBlogPost(page);
-});
+  return notionToJournalPost(page)
+})
 
 export const getPageContentById = cache(async (id: string) => {
-  const page = await notionClientForPageContent.getPage(id);
+  try {
+    const page = await notionClientForPageContent.getPage(id)
 
-  if (!page) {
-    throw new Error("Post not found");
+    if (!page) {
+      throw new Error('Post not found')
+    }
+
+    // @ts-ignore
+    if (!page.raw.page.properties.Publish.checkbox) {
+      throw new Error(`Page is not published: ${id}`)
+    }
+
+    return page
+  } catch (error) {
+    console.error(`Error fetching page content for ${id}:`, error)
+    // Return a minimal page structure to prevent build failures
+    return {
+      recordMap: {
+        block: {},
+        notion_user: {},
+        collection: {},
+        collection_view: {},
+        space: {},
+      },
+    }
   }
+})
 
-  if (!page.raw.page.properties.Publish.checkbox) {
-    throw new Error(`Page is not published: ${id}`);
-  }
-
-  return page;
-});
-
-export const getPagePropertiesBySlug = cache(async (slug: string) => {
-  const results = await notion.databases.query({
-    database_id: "1748c1c8e5d64a2782209ad917ad83d8",
-    filter: {
-      and: [
-        {
-          property: "Slug",
-          formula: {
-            string: {
-              equals: slug,
-            },
-          },
-        },
-        {
-          property: "Publish",
-          checkbox: {
-            equals: true,
-          },
-        },
-      ],
-    },
-  });
-
-  if (results.results.length === 0) {
-    throw new Error("Post not found");
-  }
-
-  return notionToBlogPost(results.results[0]);
-});
-
-export const getRelatedPostsBySlug = cache(
-  async (slug: string, limit: number = 3) => {
-    const post = await getPagePropertiesBySlug(slug);
+export const getRelatedPostsById = cache(
+  async (id: string, limit: number = 3) => {
+    const post = await getPagePropertiesById(id)
 
     if (!post) {
-      return [];
+      return []
     }
 
     const relatedPosts = await notion.databases.query({
-      database_id: "1748c1c8e5d64a2782209ad917ad83d8",
+      database_id: NOTION_DATABASE_ID!,
       filter: {
         and: [
           {
             or: [
               ...post.tags.map((tag) => ({
-                property: "Tags",
+                property: 'Tags',
                 multi_select: {
                   contains: tag.name,
                 },
@@ -99,7 +104,7 @@ export const getRelatedPostsBySlug = cache(
             ],
           },
           {
-            property: "Publish",
+            property: 'Publish',
             checkbox: {
               equals: true,
             },
@@ -108,105 +113,111 @@ export const getRelatedPostsBySlug = cache(
       },
       sorts: [
         {
-          property: "When",
-          direction: "descending",
+          property: 'When',
+          direction: 'descending',
         },
       ],
       page_size: limit,
-    });
+    })
 
     return relatedPosts.results
-      .map((post) => notionToBlogPost(post))
-      .filter((p) => p.id !== post.id);
-  }
-);
+      .map((post) => notionToJournalPost(post))
+      .filter((p) => p.id !== post.id)
+  },
+)
 
-export const getBlogPosts = cache(
+export const getJournalPosts = cache(
   async (
     start_cursor: string | undefined = undefined,
-    page_size: number = 5
+    page_size: number = 10,
   ) => {
-    const blogPosts = await notion.databases.query({
+    const journalPosts = await notion.databases.query({
       page_size,
       start_cursor,
-      database_id: "1748c1c8e5d64a2782209ad917ad83d8",
+      database_id: NOTION_DATABASE_ID!,
       sorts: [
         {
-          property: "When",
-          direction: "descending",
+          property: 'When',
+          direction: 'descending',
         },
       ],
       filter: {
         and: [
           {
-            property: "Project",
+            property: 'Project',
             relation: {
-              contains: "64b6780a-3221-4e50-88d2-15e6760d893f",
+              contains: NOTION_PROJECT_ID!,
             },
           },
           {
-            property: "Publish",
+            property: 'Publish',
             checkbox: {
               equals: true,
             },
           },
         ],
       },
-    });
+    })
 
     return {
-      posts: blogPosts.results.map((post) => notionToBlogPost(post)),
-      has_more: blogPosts.has_more,
-      next_cursor: blogPosts.next_cursor ?? undefined,
-    };
-  }
-);
+      posts: journalPosts.results.map((post) => notionToJournalPost(post)),
+      has_more: journalPosts.has_more,
+      next_cursor: journalPosts.next_cursor ?? undefined,
+    }
+  },
+)
 
-export const getAllBlogPosts = cache(async () => {
-  let has_more = true;
-  let next_cursor: string | undefined = undefined;
-  let posts: BlogPost[] = [];
+export const getAllJournalPosts = cache(async () => {
+  let has_more = true
+  let next_cursor: string | undefined = undefined
+  let posts: JournalPost[] = []
 
   while (has_more) {
     const {
       posts: newPosts,
       has_more: newHasMore,
       next_cursor: newCursor,
-    } = await getBlogPosts(next_cursor, 100);
-    posts.push(...newPosts);
-    has_more = newHasMore;
-    next_cursor = newCursor;
+    } = await getJournalPosts(next_cursor, 100)
+    posts.push(...newPosts)
+    has_more = newHasMore
+    next_cursor = newCursor
   }
 
-  return posts;
-});
+  return posts
+})
 
-function getFullPlainTextString(title: any) {
-  return title?.map((text: any) => text.plain_text).join(" ") ?? "Untitled";
+function getFullPlainTextString(
+  title: { plain_text: string }[] | undefined | null,
+) {
+  if (!title || !Array.isArray(title)) {
+    return 'Untitled'
+  }
+  return title.map((text) => text?.plain_text || '').join(' ') || 'Untitled'
 }
 
-export function notionToBlogPost(notionData: any): BlogPost {
+export function notionToJournalPost(notionData: any): JournalPost {
   const post = {
     id: notionData.id,
-    createdAt: new Date(notionData.created_time),
-    teamId: notionData.created_by?.id ?? "",
+    createdAt: new Date(notionData.created_time).toISOString(),
+    teamId: notionData.created_by?.id ?? '',
     title: getFullPlainTextString(notionData.properties.Name?.title),
     description: getFullPlainTextString(
-      notionData.properties.Description?.rich_text
+      notionData.properties.Description?.rich_text,
     ),
-    slug: notionData.properties.Slug?.formula?.string ?? "",
-    image: notionData.properties.Image?.files[0]?.file?.url ?? "",
-    authorId: notionData.created_by?.id ?? "",
-    updatedAt: new Date(notionData.last_edited_time),
+    // TODO: add slug
+    slug: notionData.id,
+    image: notionData.properties.Image?.files[0]?.file?.url ?? '',
+    authorId: notionData.created_by?.id ?? '',
+    updatedAt: new Date(notionData.last_edited_time).toISOString(),
     publishedAt: notionData.properties.When?.date?.start
-      ? new Date(notionData.properties.When.date.start)
+      ? new Date(notionData.properties.When.date.start).toISOString()
       : null,
     tags:
       notionData.properties.Tags?.multi_select?.map((tag: any) => ({
         id: tag.id,
         name: tag.name,
       })) ?? [],
-  };
+  }
 
-  return post;
+  return post
 }

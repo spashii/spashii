@@ -1,0 +1,118 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import { NotionRenderer } from '@/components/NotionRenderer'
+import Layout from '@/layouts/Layout.astro'
+import { getAllJournalPosts, getPageContentById } from '@/lib/notion'
+import { formatDate } from '@/lib/utils'
+
+export async function getStaticPaths() {
+  const posts = await getAllJournalPosts()
+  return posts.map((post) => ({
+    params: { id: post.slug },
+    props: { post },
+  }))
+}
+
+const { post } = Astro.props
+let pageContent
+try {
+  pageContent = await getPageContentById(post.id)
+} catch (error) {
+  console.error(`Failed to load content for post ${post.id}:`, error)
+  pageContent = null
+}
+---
+
+<Layout>
+  <div slot="head">
+    <title>{post.title} | Journal</title>
+    <meta name="description" content={post.description} />
+    {post.image && <meta property="og:image" content={post.image} />}
+    <!-- Notion styles -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/react-notion-x@6.16.0/src/styles.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/prismjs@1.27.0/themes/prism.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css"
+    />
+  </div>
+
+  <section
+    class="relative left-[calc(50%-50vw)] grid w-screen grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-6 px-4"
+  >
+    <div class="col-start-2">
+      <Breadcrumbs
+        items={[
+          { href: '/journal', label: 'Journal', icon: 'lucide:book-open' },
+          {
+            href: `/journal/${post.slug}`,
+            label: post.title,
+            icon: 'lucide:file-text',
+          },
+        ]}
+      />
+    </div>
+
+    {
+      post.image && (
+        <img
+          src={post.image}
+          alt={post.title}
+          class="col-span-full mx-auto w-full max-w-5xl rounded-lg object-cover"
+        />
+      )
+    }
+
+    <section class="col-start-2 flex flex-col gap-y-6 text-center">
+      <div class="flex flex-col">
+        <h1
+          class="mb-2 scroll-mt-31 text-4xl leading-tight font-medium text-pretty"
+        >
+          {post.title}
+        </h1>
+
+        <div
+          class="text-muted-foreground mb-4 flex flex-wrap items-center justify-center gap-2 text-sm"
+        >
+          <div class="flex items-center gap-2">
+            <span
+              >{formatDate(new Date(post.publishedAt || post.createdAt))}</span
+            >
+          </div>
+        </div>
+
+        {
+          post.tags && post.tags.length > 0 && (
+            <div class="flex flex-wrap justify-center gap-2">
+              {post.tags.map((tag) => (
+                <span class="bg-secondary text-secondary-foreground inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium">
+                  #{tag.name}
+                </span>
+              ))}
+            </div>
+          )
+        }
+      </div>
+    </section>
+
+    <article class="col-start-2 max-w-none">
+      {
+        pageContent ? (
+          <NotionRenderer recordMap={pageContent} client:load />
+        ) : (
+          <div class="py-8 text-center">
+            <p class="text-muted-foreground">
+              Content could not be loaded at this time.
+            </p>
+          </div>
+        )
+      }
+    </article>
+  </section>
+</Layout>

@@ -1,0 +1,23 @@
+---
+import { SOCIAL_LINKS } from '@/consts'
+import SocialIcons from './SocialIcons.astro'
+
+const currentYear = new Date().getFullYear()
+---
+
+<footer class="py-4">
+  <div
+    class="mx-auto flex max-w-3xl flex-col items-center justify-center gap-y-2 px-4 sm:flex-row sm:justify-between"
+  >
+    <div class="flex flex-wrap items-center justify-center gap-x-2 text-center">
+      <span
+        class="text-muted-foreground text-xs"
+        style="cursor: pointer;"
+        onclick='alert("This doesn&apos;t really mean anything :)")'
+      >
+        spashii &copy; {currentYear}
+      </span>
+    </div>
+    <SocialIcons links={SOCIAL_LINKS} />
+  </div>
+</footer>

@@ -1,0 +1,333 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Link from '@/components/Link.astro'
+import PageHead from '@/components/PageHead.astro'
+import Layout from '@/layouts/Layout.astro'
+import { getAllJournalPosts } from '@/lib/notion'
+
+const query = Astro.url.searchParams.get('q') || ''
+const tag = Astro.url.searchParams.get('tag') || ''
+const journal = await getAllJournalPosts()
+
+// Server-side search for initial results (simple text matching)
+let initialResults = journal
+if (query) {
+  initialResults = journal.filter(
+    (post) =>
+      post.title.toLowerCase().includes(query.toLowerCase()) ||
+      post.description.toLowerCase().includes(query.toLowerCase()) ||
+      post.tags?.some((tag) =>
+        tag.name.toLowerCase().includes(query.toLowerCase())
+      )
+  )
+} else if (tag) {
+  initialResults = journal.filter((post) =>
+    post.tags?.some((t) => t.name.toLowerCase() === tag.toLowerCase())
+  )
+}
+
+const searchTerm = query || tag
+---
+
+<Layout>
+  <PageHead
+    slot="head"
+    title={`Search Results${searchTerm ? ` for "${searchTerm}"` : ''}`}
+  />
+
+  <Breadcrumbs
+    items={[
+      { href: '/', label: 'Home', icon: 'lucide:home' },
+      {
+        href: `/search${searchTerm ? `?${query ? 'q' : 'tag'}=${encodeURIComponent(searchTerm)}` : ''}`,
+        label: `Search${searchTerm ? ` - ${searchTerm}` : ''}`,
+        icon: 'lucide:search',
+      },
+    ]}
+  />
+
+  <!-- Search Interface -->
+  <section class="mb-8">
+    <div class="flex flex-col gap-4">
+      <div>
+        <h1 class="mb-2 text-3xl font-medium">
+          {searchTerm ? `Search Results for "${searchTerm}"` : 'Search'}
+        </h1>
+        <p class="text-muted-foreground">
+          {
+            searchTerm
+              ? `Found ${initialResults.length} result${initialResults.length !== 1 ? 's' : ''}`
+              : 'Search through journal entries, projects, and content'
+          }
+        </p>
+      </div>
+
+      <!-- Enhanced Search Box -->
+      <div class="max-w-2xl">
+        <div id="search-container">
+          <!-- Search component will be mounted here -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search Results -->
+  <section>
+    <div id="search-results" class="space-y-6">
+      <!-- Server-side results (will be replaced by client-side) -->
+      {
+        searchTerm && (
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-medium">
+                Journal Results ({initialResults.length})
+              </h2>
+              {tag && (
+                <Link
+                  href="/tags"
+                  class="text-muted-foreground hover:text-foreground text-sm"
+                >
+                  View all tags →
+                </Link>
+              )}
+            </div>
+
+            {initialResults.length === 0 ? (
+              <div class="py-12 text-center">
+                <div class="text-muted-foreground mb-2">No results found</div>
+                <p class="text-muted-foreground text-sm">
+                  Try searching with different keywords or
+                  <Link href="/tags" class="underline">
+                    browse by tags
+                  </Link>
+                </p>
+              </div>
+            ) : (
+              <div class="grid gap-4">
+                {initialResults.map((post) => (
+                  <article class="group hover:bg-muted/50 relative rounded-lg border p-6 transition-colors">
+                    <div class="flex flex-col gap-3">
+                      <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                          <h3 class="mb-1 text-lg font-semibold">
+                            <a
+                              href={`/journal/${post.slug}`}
+                              class="hover:underline"
+                            >
+                              {post.title}
+                            </a>
+                          </h3>
+                          <p class="text-muted-foreground line-clamp-2 text-sm">
+                            {post.description}
+                          </p>
+                        </div>
+                        <span class="text-muted-foreground text-xs whitespace-nowrap">
+                          Journal
+                        </span>
+                      </div>
+
+                      <div class="text-muted-foreground flex items-center gap-2 text-sm">
+                        <time datetime={post.publishedAt || post.createdAt}>
+                          {new Date(
+                            post.publishedAt || post.createdAt
+                          ).toLocaleDateString()}
+                        </time>
+
+                        {post.tags && post.tags.length > 0 && (
+                          <>
+                            <span>•</span>
+                            <div class="flex flex-wrap gap-1">
+                              {post.tags.map((postTag) => (
+                                <a
+                                  href={`/search?tag=${encodeURIComponent(postTag.name)}`}
+                                  class={`inline-flex items-center rounded px-2 py-1 text-xs transition-colors ${
+                                    tag === postTag.name
+                                      ? 'bg-primary text-primary-foreground'
+                                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                                  }`}
+                                >
+                                  #{postTag.name}
+                                </a>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      }
+
+      <!-- Projects Section (placeholder) -->
+      <div class="space-y-4" style="display: none;" id="projects-section">
+        <h2 class="text-xl font-medium">Projects (0)</h2>
+        <div class="text-muted-foreground py-8 text-center">
+          <p>Project search coming soon...</p>
+        </div>
+      </div>
+
+      <!-- Videos Section (placeholder) -->
+      <div class="space-y-4" style="display: none;" id="videos-section">
+        <h2 class="text-xl font-medium">Videos (0)</h2>
+        <div class="text-muted-foreground py-8 text-center">
+          <p>Video search coming soon...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import SearchProvider from '@/components/SearchProvider.tsx'
+  import { createElement } from 'react'
+  import { createRoot } from 'react-dom/client'
+
+  // Get data passed from server
+  const journal = window.__JOURNAL_DATA__ || []
+  const initialQuery = window.__SEARCH_QUERY__ || ''
+
+  // Mount enhanced search component
+  const searchContainer = document.getElementById('search-container')
+  if (searchContainer) {
+    const root = createRoot(searchContainer)
+    root.render(
+      createElement(SearchProvider, {
+        posts: journal,
+        className: 'w-full',
+        onTagClick: (tag: string) => {
+          window.location.href = `/search?tag=${encodeURIComponent(tag)}`
+        },
+      })
+    )
+  }
+
+  // Enhanced client-side search results rendering
+  function renderSearchResults(results: any) {
+    const resultsContainer = document.getElementById('search-results')
+    if (!resultsContainer) return
+
+    const journalResults = results.results?.journal || []
+    const projectResults = results.results?.project || []
+    const videoResults = results.results?.video || []
+
+    let html = ''
+
+    // Journal Results
+    if (journalResults.length > 0) {
+      html += `
+        <div class="space-y-4">
+          <h2 class="text-xl font-medium">Journal Results (${journalResults.length})</h2>
+          <div class="grid gap-4">
+            ${journalResults
+              .map(
+                (post: any) => `
+              <article class="group hover:bg-muted/50 relative rounded-lg border p-6 transition-colors">
+                <div class="flex flex-col gap-3">
+                  <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                      <h3 class="text-lg font-semibold mb-1">
+                        <a href="/journal/${post.slug}" class="hover:underline">
+                          ${post.title}
+                        </a>
+                      </h3>
+                      <p class="text-muted-foreground text-sm line-clamp-2">
+                        ${post.description}
+                      </p>
+                    </div>
+                    <span class="text-xs text-muted-foreground whitespace-nowrap">
+                      Journal
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <time>${new Date(post.publishedAt || post.createdAt).toLocaleDateString()}</time>
+                    ${
+                      post.tags && post.tags.length > 0
+                        ? `
+                      <span>•</span>
+                      <div class="flex gap-1 flex-wrap">
+                        ${post.tags
+                          .map(
+                            (tag: any) => `
+                          <a href="/search?tag=${encodeURIComponent(typeof tag === 'string' ? tag : tag.name)}" 
+                             class="inline-flex items-center rounded px-2 py-1 text-xs bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
+                            #${typeof tag === 'string' ? tag : tag.name}
+                          </a>
+                        `
+                          )
+                          .join('')}
+                      </div>
+                    `
+                        : ''
+                    }
+                  </div>
+                </div>
+              </article>
+            `
+              )
+              .join('')}
+          </div>
+        </div>
+      `
+    }
+
+    // Project Results (placeholder)
+    if (projectResults.length > 0) {
+      html += `
+        <div class="space-y-4">
+          <h2 class="text-xl font-medium">Project Results (${projectResults.length})</h2>
+          <div class="text-center py-8 text-muted-foreground">
+            <p>Project results will be displayed here...</p>
+          </div>
+        </div>
+      `
+    }
+
+    // Video Results (placeholder)
+    if (videoResults.length > 0) {
+      html += `
+        <div class="space-y-4">
+          <h2 class="text-xl font-medium">Video Results (${videoResults.length})</h2>
+          <div class="text-center py-8 text-muted-foreground">
+            <p>Video results will be displayed here...</p>
+          </div>
+        </div>
+      `
+    }
+
+    if (html === '') {
+      html = `
+        <div class="text-center py-12">
+          <div class="text-muted-foreground mb-2">No results found</div>
+          <p class="text-sm text-muted-foreground">
+            Try searching with different keywords or 
+            <a href="/tags" class="underline">browse by tags</a>
+          </p>
+        </div>
+      `
+    }
+
+    resultsContainer.innerHTML = html
+  }
+
+  // Set up search result handling
+  if (initialQuery) {
+    // Perform initial search if query is provided
+    setTimeout(() => {
+      const searchService = (window as any).__searchService
+      if (searchService) {
+        const results = searchService.search(initialQuery)
+        renderSearchResults(results)
+      }
+    }, 100)
+  }
+</script>
+
+<script is:inline define:vars={{ journal, query, tag }}>
+  window.__JOURNAL_DATA__ = journal
+  window.__SEARCH_QUERY__ = query || tag
+</script>
+

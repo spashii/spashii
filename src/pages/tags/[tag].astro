@@ -1,0 +1,234 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Link from '@/components/Link.astro'
+import PageHead from '@/components/PageHead.astro'
+import Layout from '@/layouts/Layout.astro'
+import { getAllJournalPosts } from '@/lib/notion'
+
+export async function getStaticPaths() {
+  const posts = await getAllJournalPosts()
+  const tags = new Set<string>()
+  
+  posts.forEach(post => {
+    if (post.tags) {
+      post.tags.forEach(tag => tags.add(tag.name))
+    }
+  })
+  
+  return Array.from(tags).map(tag => ({
+    params: { tag: encodeURIComponent(tag) },
+    props: {}
+  }))
+}
+
+const { tag } = Astro.params
+const decodedTag = decodeURIComponent(tag!)
+
+const journal = await getAllJournalPosts()
+const taggedPosts = journal.filter(post => 
+  post.tags?.some(t => t.name === decodedTag)
+).sort((a, b) => {
+  const dateA = new Date(a.publishedAt || a.createdAt)
+  const dateB = new Date(b.publishedAt || b.createdAt)
+  return dateB.getTime() - dateA.getTime()
+})
+
+// Get related tags (tags that appear with this tag)
+const relatedTags = new Map<string, number>()
+taggedPosts.forEach(post => {
+  if (post.tags) {
+    post.tags.forEach(t => {
+      if (t.name !== decodedTag) {
+        relatedTags.set(t.name, (relatedTags.get(t.name) || 0) + 1)
+      }
+    })
+  }
+})
+
+const sortedRelatedTags = Array.from(relatedTags.entries())
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => b.count - a.count)
+  .slice(0, 10)
+
+// Group posts by year
+const postsByYear = taggedPosts.reduce((acc: Record<string, typeof taggedPosts>, post) => {
+  const year = new Date(post.publishedAt || post.createdAt).getFullYear().toString()
+  if (!acc[year]) acc[year] = []
+  acc[year].push(post)
+  return acc
+}, {})
+
+const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
+---
+
+<Layout>
+  <PageHead slot="head" title={`Tag: ${decodedTag}`} />
+  
+  <Breadcrumbs
+    items={[
+      { href: '/', label: 'Home', icon: 'lucide:home' },
+      { href: '/tags', label: 'Tags', icon: 'lucide:hash' },
+      { href: `/tags/${tag}`, label: `#${decodedTag}`, icon: 'lucide:tag' },
+    ]}
+  />
+
+  <!-- Header -->
+  <section class="mb-8">
+    <div class="flex flex-col gap-4">
+      <div>
+        <h1 class="text-3xl font-medium mb-2 flex items-center gap-2">
+          <span class="text-muted-foreground">#</span>
+          {decodedTag}
+        </h1>
+        <p class="text-muted-foreground">
+          {taggedPosts.length} post{taggedPosts.length !== 1 ? 's' : ''} tagged with "{decodedTag}"
+        </p>
+      </div>
+      
+      <!-- Actions -->
+      <div class="flex items-center gap-2">
+        <Link
+          href={`/search?tag=${encodeURIComponent(decodedTag)}`}
+          class="text-sm px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          Search this tag
+        </Link>
+        <Link
+          href="/tags"
+          class="text-sm px-3 py-1.5 rounded-lg border hover:bg-muted/50"
+        >
+          All tags
+        </Link>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tag Stats and Related Tags -->
+  {sortedRelatedTags.length > 0 && (
+    <section class="mb-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Tag Statistics -->
+        <div class="rounded-lg border p-4">
+          <h3 class="font-medium mb-3">Statistics</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-muted-foreground">Total Posts:</span>
+              <span class="font-medium">{taggedPosts.length}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-muted-foreground">Date Range:</span>
+              <span class="font-medium">
+                {years.length > 0 ? `${years[years.length - 1]} - ${years[0]}` : 'N/A'}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-muted-foreground">Related Tags:</span>
+              <span class="font-medium">{sortedRelatedTags.length}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Related Tags -->
+        <div class="lg:col-span-2 rounded-lg border p-4">
+          <h3 class="font-medium mb-3">Related Tags</h3>
+          <div class="flex flex-wrap gap-2">
+            {sortedRelatedTags.map((relatedTag) => (
+              <a
+                href={`/tags/${encodeURIComponent(relatedTag.name)}`}
+                class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+              >
+                <span>#</span>
+                <span>{relatedTag.name}</span>
+                <span class="text-xs opacity-75">({relatedTag.count})</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Posts -->
+  <section>
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-medium">Posts</h2>
+      <div class="text-sm text-muted-foreground">
+        Sorted by date (newest first)
+      </div>
+    </div>
+
+    {taggedPosts.length === 0 ? (
+      <div class="text-center py-12">
+        <div class="text-muted-foreground mb-2">
+          No posts found with tag "{decodedTag}"
+        </div>
+        <p class="text-sm text-muted-foreground">
+          <Link href="/tags" class="underline">Browse all tags</Link> or 
+          <Link href="/journal" class="underline">view all posts</Link>
+        </p>
+      </div>
+    ) : (
+      <div class="space-y-8">
+        {years.map((year) => (
+          <div class="space-y-4">
+            <div class="flex items-center gap-3">
+              <h3 class="text-lg font-medium">{year}</h3>
+              <div class="flex-1 h-px bg-border"></div>
+              <div class="text-sm text-muted-foreground">
+                {postsByYear[year].length} post{postsByYear[year].length !== 1 ? 's' : ''}
+              </div>
+            </div>
+            
+            <div class="grid gap-4">
+              {postsByYear[year].map((post) => (
+                <article class="group hover:bg-muted/50 relative rounded-lg border p-6 transition-colors">
+                  <div class="flex flex-col gap-3">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex-1">
+                        <h4 class="text-lg font-semibold mb-1">
+                          <a 
+                            href={`/journal/${post.slug}`} 
+                            class="hover:underline"
+                          >
+                            {post.title}
+                          </a>
+                        </h4>
+                        <p class="text-muted-foreground text-sm line-clamp-2">
+                          {post.description}
+                        </p>
+                      </div>
+                      <time 
+                        class="text-xs text-muted-foreground whitespace-nowrap"
+                        datetime={post.publishedAt || post.createdAt}
+                      >
+                        {new Date(post.publishedAt || post.createdAt).toLocaleDateString()}
+                      </time>
+                    </div>
+                    
+                    {post.tags && post.tags.length > 1 && (
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs text-muted-foreground">Other tags:</span>
+                        <div class="flex gap-1 flex-wrap">
+                          {post.tags
+                            .filter(t => t.name !== decodedTag)
+                            .map((postTag) => (
+                              <a 
+                                href={`/tags/${encodeURIComponent(postTag.name)}`}
+                                class="inline-flex items-center rounded px-1.5 py-0.5 text-xs bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+                              >
+                                #{postTag.name}
+                              </a>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </section>
+</Layout> 

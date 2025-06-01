@@ -1,0 +1,100 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import PageHead from '@/components/PageHead.astro'
+import PaginationComponent from '@/components/ui/pagination'
+import { SITE } from '@/consts'
+import Layout from '@/layouts/Layout.astro'
+import { getAllJournalPosts } from '@/lib/notion'
+import type { PaginateFunction } from 'astro'
+
+export async function getStaticPaths({
+  paginate,
+}: {
+  paginate: PaginateFunction
+}) {
+  const allPosts = await getAllJournalPosts()
+  return paginate(allPosts, { pageSize: SITE.postsPerPage })
+}
+
+const { page } = Astro.props
+
+// Group posts by year
+const postsByYear = page.data.reduce(
+  (acc: Record<string, any[]>, post: any) => {
+    const year = new Date(post.publishedAt || post.createdAt)
+      .getFullYear()
+      .toString()
+    if (!acc[year]) acc[year] = []
+    acc[year].push(post)
+    return acc
+  },
+  {}
+)
+
+const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
+---
+
+<Layout>
+  <PageHead slot="head" title="Journal" />
+  <Breadcrumbs
+    items={[
+      { label: 'Journal', href: '/journal', icon: 'lucide:book-open' },
+      { label: `Page ${page.currentPage}`, icon: 'lucide:file-text' },
+    ]}
+  />
+
+  <div class="flex min-h-[calc(100vh-18rem)] flex-col gap-y-8">
+    {
+      years.map((year) => (
+        <section class="flex flex-col gap-y-4">
+          <div class="font-medium">{year}</div>
+          <ul class="flex flex-col gap-4">
+            {postsByYear[year].map((post) => (
+              <li>
+                <article class="group hover:bg-muted/50 relative rounded-lg border p-6 transition-colors">
+                  <div class="flex flex-col gap-2">
+                    <h2 class="text-xl font-semibold">
+                      <a href={`/journal/${post.slug}`} class="hover:underline">
+                        {post.title}
+                      </a>
+                    </h2>
+                    <p class="text-muted-foreground">{post.description}</p>
+                    <div class="text-muted-foreground flex items-center gap-2 text-sm">
+                      <time datetime={post.publishedAt || post.createdAt}>
+                        {new Date(
+                          post.publishedAt || post.createdAt
+                        ).toLocaleDateString()}
+                      </time>
+                      {post.tags && post.tags.length > 0 && (
+                        <>
+                          <span>•</span>
+                          <div class="flex gap-1">
+                            {post.tags.map((tag: any) => (
+                              <a
+                                href={`/tags/${encodeURIComponent(tag.name)}`}
+                                class="bg-secondary hover:bg-secondary/80 rounded px-2 py-1 text-xs transition-colors"
+                              >
+                                #{tag.name}
+                              </a>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+
+  <PaginationComponent
+    currentPage={page.currentPage}
+    totalPages={page.lastPage}
+    baseUrl="/journal/"
+    client:load
+  />
+</Layout>

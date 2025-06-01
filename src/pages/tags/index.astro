@@ -1,0 +1,248 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Link from '@/components/Link.astro'
+import PageHead from '@/components/PageHead.astro'
+import Layout from '@/layouts/Layout.astro'
+import { getAllJournalPosts } from '@/lib/notion'
+
+const journal = await getAllJournalPosts()
+
+// Aggregate tags with counts
+const tagStats = new Map<string, { count: number; posts: typeof journal }>()
+
+journal.forEach(post => {
+  if (post.tags) {
+    post.tags.forEach(tag => {
+      const existing = tagStats.get(tag.name) || { count: 0, posts: [] }
+      existing.count += 1
+      existing.posts.push(post)
+      tagStats.set(tag.name, existing)
+    })
+  }
+})
+
+// Convert to sorted array
+const sortedTags = Array.from(tagStats.entries())
+  .map(([name, stats]) => ({
+    name,
+    count: stats.count,
+    posts: stats.posts
+  }))
+  .sort((a, b) => b.count - a.count)
+
+const totalTags = sortedTags.length
+const totalPosts = journal.length
+const maxCount = Math.max(...sortedTags.map(t => t.count))
+---
+
+<Layout>
+  <PageHead slot="head" title="Tags" />
+  
+  <Breadcrumbs
+    items={[
+      { href: '/', label: 'Home', icon: 'lucide:home' },
+      { href: '/tags', label: 'Tags', icon: 'lucide:hash' },
+    ]}
+  />
+
+  <!-- Header -->
+  <section class="mb-8">
+    <div class="flex flex-col gap-4">
+      <div>
+        <h1 class="text-3xl font-medium mb-2">Tags</h1>
+        <p class="text-muted-foreground">
+          Explore {totalTags} tags across {totalPosts} journal entries
+        </p>
+      </div>
+      
+      <!-- Search Box -->
+      <div class="max-w-md">
+        <div id="tag-search">
+          <input
+            type="text"
+            placeholder="Search tags..."
+            class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            id="tag-search-input"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tag Statistics -->
+  <section class="mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="rounded-lg border p-4">
+        <div class="text-2xl font-semibold">{totalTags}</div>
+        <div class="text-sm text-muted-foreground">Total Tags</div>
+      </div>
+      <div class="rounded-lg border p-4">
+        <div class="text-2xl font-semibold">{sortedTags[0]?.count || 0}</div>
+        <div class="text-sm text-muted-foreground">Most Used</div>
+        {sortedTags[0] && (
+          <div class="text-xs text-muted-foreground mt-1">#{sortedTags[0].name}</div>
+        )}
+      </div>
+      <div class="rounded-lg border p-4">
+        <div class="text-2xl font-semibold">
+          {(totalPosts / totalTags).toFixed(1)}
+        </div>
+        <div class="text-sm text-muted-foreground">Avg Posts/Tag</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tag Cloud -->
+  <section class="mb-8">
+    <h2 class="text-2xl font-medium mb-4">Tag Cloud</h2>
+    <div class="rounded-lg border p-6">
+      <div class="flex flex-wrap gap-3" id="tag-cloud">
+        {sortedTags.map((tag) => {
+          const size = Math.max(0.75, Math.min(2, (tag.count / maxCount) * 1.5 + 0.5))
+          const opacity = Math.max(0.6, Math.min(1, (tag.count / maxCount) * 0.4 + 0.6))
+          
+          return (
+            <a
+              href={`/tags/${encodeURIComponent(tag.name)}`}
+              class="tag-item inline-flex items-center rounded-lg px-3 py-2 transition-all hover:scale-110 hover:shadow-md bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              style={`font-size: ${size}rem; opacity: ${opacity}`}
+              data-tag={tag.name.toLowerCase()}
+              data-count={tag.count}
+            >
+              <span class="mr-1">#</span>
+              <span>{tag.name}</span>
+              <span class="ml-2 text-xs opacity-75">({tag.count})</span>
+            </a>
+          )
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Tags -->
+  <section class="mb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-medium">Popular Tags</h2>
+      <Link href="#tag-cloud" class="text-sm text-muted-foreground hover:text-foreground">
+        View all in cloud ↑
+      </Link>
+    </div>
+    <div class="grid gap-4">
+      {sortedTags.slice(0, 10).map((tag, index) => (
+        <div class="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="text-lg font-medium text-muted-foreground w-6">
+              {index + 1}
+            </div>
+            <div>
+              <a
+                href={`/tags/${encodeURIComponent(tag.name)}`}
+                class="font-medium hover:underline"
+              >
+                #{tag.name}
+              </a>
+              <div class="text-sm text-muted-foreground">
+                {tag.count} post{tag.count !== 1 ? 's' : ''}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Progress bar -->
+            <div class="w-20 h-2 bg-secondary rounded-full overflow-hidden">
+              <div 
+                class="h-full bg-primary rounded-full transition-all"
+                style={`width: ${(tag.count / maxCount) * 100}%`}
+              ></div>
+            </div>
+            <Link
+              href={`/search?tag=${encodeURIComponent(tag.name)}`}
+              class="text-xs px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              View
+            </Link>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- All Tags List -->
+  <section>
+    <h2 class="text-2xl font-medium mb-4">All Tags</h2>
+    <div class="rounded-lg border">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0" id="all-tags-list">
+        {sortedTags.map((tag, index) => (
+          <div class={`p-4 flex items-center justify-between hover:bg-muted/50 transition-colors ${
+            index % 3 !== 2 ? 'lg:border-r' : ''
+          } ${
+            index % 2 !== 1 ? 'sm:border-r lg:border-r-0' : 'sm:border-r-0'
+          } ${
+            index < sortedTags.length - 3 ? 'lg:border-b' : ''
+          } ${
+            index < sortedTags.length - 2 ? 'sm:border-b lg:border-b-0' : 'sm:border-b-0'
+          } ${
+            index < sortedTags.length - 1 ? 'border-b sm:border-b-0' : ''
+          }`}
+          data-tag={tag.name.toLowerCase()}
+        >
+          <a
+            href={`/tags/${encodeURIComponent(tag.name)}`}
+            class="flex-1 hover:underline"
+          >
+            #{tag.name}
+          </a>
+          <div class="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>{tag.count}</span>
+            <Link
+              href={`/search?tag=${encodeURIComponent(tag.name)}`}
+              class="text-xs px-1.5 py-0.5 rounded bg-secondary hover:bg-secondary/80"
+            >
+              →
+            </Link>
+          </div>
+        </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  // Tag search functionality
+  const searchInput = document.getElementById('tag-search-input') as HTMLInputElement
+  const tagCloud = document.getElementById('tag-cloud')
+  const allTagsList = document.getElementById('all-tags-list')
+
+  if (searchInput && tagCloud && allTagsList) {
+    searchInput.addEventListener('input', (e) => {
+      const query = (e.target as HTMLInputElement).value.toLowerCase().trim()
+      
+      // Filter tag cloud
+      const cloudTags = tagCloud.querySelectorAll('.tag-item')
+      cloudTags.forEach((tag) => {
+        const tagName = tag.getAttribute('data-tag') || ''
+        const isVisible = !query || tagName.includes(query)
+        ;(tag as HTMLElement).style.display = isVisible ? 'inline-flex' : 'none'
+      })
+      
+      // Filter all tags list
+      const listTags = allTagsList.querySelectorAll('[data-tag]')
+      listTags.forEach((tag) => {
+        const tagName = tag.getAttribute('data-tag') || ''
+        const isVisible = !query || tagName.includes(query)
+        ;(tag as HTMLElement).style.display = isVisible ? 'flex' : 'none'
+      })
+    })
+  }
+
+  // Add hover effects to tag cloud
+  const tagItems = document.querySelectorAll('.tag-item')
+  tagItems.forEach((item) => {
+    item.addEventListener('mouseenter', () => {
+      const count = item.getAttribute('data-count')
+      if (count) {
+        item.setAttribute('title', `${count} posts`)
+      }
+    })
+  })
+</script> 
